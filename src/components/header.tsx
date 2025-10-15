@@ -16,8 +16,10 @@ export default function Header() {
         isDialogOpen, 
         setIsDialogOpen, 
         handleMetricsUpdate, 
-        handleBacklogUpdate, 
-        backlogData 
+        handleBacklogUpdate,
+        handleHourlyBacklogUpdate, 
+        backlogData,
+        hourlyBacklog
     } = useAdmin();
 
   return (
@@ -32,11 +34,17 @@ export default function Header() {
               Admin Controls
             </Button>
           </DialogTrigger>
-          <DialogContent>
+          <DialogContent className="max-w-xl">
             <DialogHeader>
               <DialogTitle>Admin Controls</DialogTitle>
             </DialogHeader>
-            <AdminForm onMetricsSubmit={handleMetricsUpdate} onBacklogSubmit={handleBacklogUpdate} backlogData={backlogData}/>
+            <AdminForm 
+              onMetricsSubmit={handleMetricsUpdate} 
+              onBacklogSubmit={handleBacklogUpdate} 
+              onHourlyBacklogSubmit={handleHourlyBacklogUpdate}
+              backlogData={backlogData}
+              hourlyData={hourlyBacklog}
+            />
           </DialogContent>
         </Dialog>
     </header>

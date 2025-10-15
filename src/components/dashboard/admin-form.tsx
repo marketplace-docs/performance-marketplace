@@ -1,6 +1,6 @@
 'use client';
 
-import { useForm } from 'react-hook-form';
+import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Button } from '@/components/ui/button';
@@ -14,6 +14,7 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ScrollArea } from '../ui/scroll-area';
 
 const metricsSchema = z.object({
   forecast: z.coerce.number().min(0),
@@ -38,10 +39,21 @@ const backlogSchema = z.object({
 
 type BacklogFormValues = z.infer<typeof backlogSchema>;
 
+const hourlyBacklogSchema = z.object({
+  hourlyData: z.array(z.object({
+    hour: z.string(),
+    value: z.coerce.number().min(0),
+  })),
+});
+
+type HourlyBacklogFormValues = z.infer<typeof hourlyBacklogSchema>;
+
 type AdminFormProps = {
   onMetricsSubmit: (data: MetricsFormValues) => void;
   onBacklogSubmit: (data: BacklogFormValues) => void;
+  onHourlyBacklogSubmit: (data: HourlyBacklogFormValues) => void;
   backlogData: { types: { statuses: any }[] };
+  hourlyData: { hour: string; value: number }[];
 };
 
 const MetricsForm = ({ onMetricsSubmit }: { onMetricsSubmit: (data: MetricsFormValues) => void }) => {
@@ -177,19 +189,65 @@ const BacklogForm = ({ onBacklogSubmit, backlogData }: { onBacklogSubmit: (data:
   );
 }
 
+const HourlyBacklogForm = ({ onHourlyBacklogSubmit, hourlyData }: { onHourlyBacklogSubmit: (data: HourlyBacklogFormValues) => void, hourlyData: { hour: string; value: number }[] }) => {
+  const form = useForm<HourlyBacklogFormValues>({
+    resolver: zodResolver(hourlyBacklogSchema),
+    defaultValues: {
+      hourlyData: hourlyData || [],
+    },
+  });
 
-export default function AdminForm({ onMetricsSubmit, onBacklogSubmit, backlogData }: AdminFormProps) {
+  const { fields } = useFieldArray({
+    control: form.control,
+    name: 'hourlyData',
+  });
+
+  return (
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onHourlyBacklogSubmit)} className="space-y-4 pt-4">
+        <ScrollArea className="h-72 w-full">
+          <div className="grid grid-cols-2 gap-x-4 gap-y-2 pr-4">
+            {fields.map((field, index) => (
+              <FormField
+                key={field.id}
+                control={form.control}
+                name={`hourlyData.${index}.value`}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{`Hour ${hourlyData[index].hour}`}</FormLabel>
+                    <FormControl>
+                      <Input type="number" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            ))}
+          </div>
+        </ScrollArea>
+        <Button type="submit">Update Hourly Backlog</Button>
+      </form>
+    </Form>
+  );
+};
+
+
+export default function AdminForm({ onMetricsSubmit, onBacklogSubmit, onHourlyBacklogSubmit, backlogData, hourlyData }: AdminFormProps) {
   return (
     <Tabs defaultValue="metrics" className="w-full">
-      <TabsList className="grid w-full grid-cols-2">
+      <TabsList className="grid w-full grid-cols-3">
         <TabsTrigger value="metrics">Metrics</TabsTrigger>
         <TabsTrigger value="backlog">Backlog</TabsTrigger>
+        <TabsTrigger value="hourly">Hourly Backlog</TabsTrigger>
       </TabsList>
       <TabsContent value="metrics">
         <MetricsForm onMetricsSubmit={onMetricsSubmit} />
       </TabsContent>
       <TabsContent value="backlog">
         <BacklogForm onBacklogSubmit={onBacklogSubmit} backlogData={backlogData} />
+      </TabsContent>
+      <TabsContent value="hourly">
+        <HourlyBacklogForm onHourlyBacklogSubmit={onHourlyBacklogSubmit} hourlyData={hourlyData} />
       </TabsContent>
     </Tabs>
   );

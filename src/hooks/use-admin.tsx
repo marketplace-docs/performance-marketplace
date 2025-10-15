@@ -31,6 +31,7 @@ type AdminContextType = {
   setIsDialogOpen: (isOpen: boolean) => void;
   handleMetricsUpdate: (data: Partial<Metrics>) => void;
   handleBacklogUpdate: (data: any) => void;
+  handleHourlyBacklogUpdate: (data: { hourlyData: { hour: string; value: number }[] }) => void;
 };
 
 const AdminContext = createContext<AdminContextType | undefined>(undefined);
@@ -117,6 +118,11 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
     setIsDialogOpen(false);
   };
   
+  const handleHourlyBacklogUpdate = (data: { hourlyData: { hour: string; value: number }[] }) => {
+    setHourlyBacklog(data.hourlyData);
+    setIsDialogOpen(false);
+  };
+
   const value = {
     metrics,
     backlogData,
@@ -126,7 +132,8 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
     isDialogOpen,
     setIsDialogOpen,
     handleMetricsUpdate,
-    handleBacklogUpdate
+    handleBacklogUpdate,
+    handleHourlyBacklogUpdate
   }
 
   return <AdminContext.Provider value={value}>{children}</AdminContext.Provider>;
