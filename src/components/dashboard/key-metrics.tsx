@@ -12,12 +12,15 @@ type KeyMetricsProps = {
   };
 };
 
-const MetricItem = ({ label, value, isPercentage = false }: { label: string; value: string | number, isPercentage?: boolean }) => (
-  <>
-    <div className="border-r border-b px-2 py-1 font-medium">{label}</div>
-    <div className="border-r border-b px-2 py-1 text-right">{typeof value === 'number' && isPercentage ? `${value.toFixed(2)}%` : value.toLocaleString()}</div>
-  </>
-);
+const MetricItem = ({ label, value, isPercentage = false }: { label: string; value: string | number, isPercentage?: boolean }) => {
+  const displayValue = value ?? 0;
+  return (
+    <>
+      <div className="border-r border-b px-2 py-1 font-medium">{label}</div>
+      <div className="border-r border-b px-2 py-1 text-right">{typeof displayValue === 'number' && isPercentage ? `${displayValue.toFixed(2)}%` : displayValue.toLocaleString()}</div>
+    </>
+  );
+}
 
 export default function KeyMetrics({ metrics }: KeyMetricsProps) {
   return (
