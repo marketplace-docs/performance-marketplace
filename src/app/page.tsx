@@ -11,6 +11,15 @@ import {
   initialBacklogData,
   initialDailySummary,
 } from '@/lib/data';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Button } from '@/components/ui/button';
+import { Settings } from 'lucide-react';
 
 type Metrics = typeof initialMetrics;
 type BacklogData = typeof initialBacklogData;
@@ -30,18 +39,14 @@ const getFromLocalStorage = (key: string, initialValue: any) => {
 };
 
 export default function Home() {
-  const [metrics, setMetrics] = useState<Metrics>(initialMetrics);
-  const [backlogData, setBacklogData] = useState<BacklogData>(initialBacklogData);
-  const [dailySummary, setDailySummary] = useState<DailySummaryData>(initialDailySummary);
+  const [metrics, setMetrics] = useState<Metrics>(() => getFromLocalStorage('metrics', initialMetrics));
+  const [backlogData, setBacklogData] = useState<BacklogData>(() => getFromLocalStorage('backlogData', initialBacklogData));
+  const [dailySummary, setDailySummary] = useState<DailySummaryData>(() => getFromLocalStorage('dailySummary', initialDailySummary));
   const [isClient, setIsClient] = useState(false);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   useEffect(() => {
     setIsClient(true);
-    if (typeof window !== 'undefined') {
-      setMetrics(getFromLocalStorage('metrics', initialMetrics));
-      setBacklogData(getFromLocalStorage('backlogData', initialBacklogData));
-      setDailySummary(getFromLocalStorage('dailySummary', initialDailySummary));
-    }
   }, []);
 
   useEffect(() => {
@@ -76,10 +81,8 @@ export default function Home() {
     });
 
     setDailySummary((prevSummary) => {
-      // Data "Day 1" sebelumnya menjadi data "Day 2" yang baru
       const newDay2 = { ...prevSummary.day1, day: 2 };
 
-      // Data "Day 1" yang baru mengambil dari input form
       const newDay1 = {
         day: 1,
         actual: data.actual !== undefined ? data.actual : prevSummary.day1.actual,
@@ -91,7 +94,12 @@ export default function Home() {
         day2: newDay2,
       };
     });
+    setIsDialogOpen(false);
   };
+
+  if (!isClient) {
+    return null;
+  }
 
   return (
     <div className="flex min-h-screen w-full flex-col bg-background text-foreground">
@@ -103,7 +111,20 @@ export default function Home() {
           </div>
           <div className="flex flex-col gap-4">
             <DailySummary data={dailySummary} />
-            <AdminForm onDataSubmit={handleDataUpdate} />
+            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+              <DialogTrigger asChild>
+                <Button>
+                  <Settings className="mr-2 h-4 w-4" />
+                  Admin Controls
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Admin Controls</DialogTitle>
+                </DialogHeader>
+                <AdminForm onDataSubmit={handleDataUpdate} />
+              </DialogContent>
+            </Dialog>
           </div>
         </div>
         <Backlog data={backlogData} />

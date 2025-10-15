@@ -13,7 +13,6 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 const formSchema = z.object({
   forecast: z.coerce.number().min(0),
@@ -44,69 +43,62 @@ export default function AdminForm({ onDataSubmit }: AdminFormProps) {
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Admin Controls</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <FormField
-              control={form.control}
-              name="forecast"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Forecast</FormLabel>
-                  <FormControl>
-                    <Input type="number" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="actual"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Actual</FormLabel>
-                  <FormControl>
-                    <Input type="number" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="oos"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>OOS</FormLabel>
-                  <FormControl>
-                    <Input type="number" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="actualOOS"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Actual OOS</FormLabel>
-                  <FormControl>
-                    <Input type="number" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <Button type="submit">Update Data</Button>
-          </form>
-        </Form>
-      </CardContent>
-    </Card>
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 pt-4">
+        <FormField
+          control={form.control}
+          name="forecast"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Forecast</FormLabel>
+              <FormControl>
+                <Input type="number" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="actual"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Actual</FormLabel>
+              <FormControl>
+                <Input type="number" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="oos"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>OOS</FormLabel>
+              <FormControl>
+                <Input type="number" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="actualOOS"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Actual OOS</FormLabel>
+              <FormControl>
+                <Input type="number" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <Button type="submit">Update Data</Button>
+      </form>
+    </Form>
   );
 }
