@@ -69,10 +69,15 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
     if (!marketplaceData) {
       return initialPerformanceData;
     }
+    const pickerValue = marketplaceData.statuses.picked.order;
+    const packerValue = marketplaceData.statuses.packed.order;
+    // Simple automatic calculation for average hours based on picker count
+    const averageHours = pickerValue > 0 ? 2.5 + (pickerValue / 1000) : 2.5;
+
     return {
-      picker: marketplaceData.statuses.picked.order,
-      packer: marketplaceData.statuses.packed.order,
-      averageHours: 2.5, // This is static for now as per requirement
+      picker: pickerValue,
+      packer: packerValue,
+      averageHours: averageHours,
     }
   }, [backlogData]);
 
