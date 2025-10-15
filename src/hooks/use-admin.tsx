@@ -34,6 +34,7 @@ type AdminContextType = {
   handleMetricsUpdate: (data: Partial<Metrics>) => void;
   handleBacklogUpdate: (data: any) => void;
   handleHourlyBacklogUpdate: (data: { hourlyData: { hour: string; value: number }[] }) => void;
+  handlePerformanceUpdate: (data: Partial<PerformanceData>) => void;
 };
 
 const AdminContext = createContext<AdminContextType | undefined>(undefined);
@@ -43,6 +44,7 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
   const [backlogData, setBacklogData] = useState<BacklogData>(() => getFromLocalStorage('backlogData', initialBacklogData));
   const [dailySummary, setDailySummary] = useState<DailySummaryData>(() => getFromLocalStorage('dailySummary', initialDailySummary));
   const [hourlyBacklog, setHourlyBacklog] = useState<HourlyBacklogData>(() => getFromLocalStorage('hourlyBacklog', initialHourlyBacklog));
+  const [performanceData, setPerformanceData] = useState<PerformanceData>(() => getFromLocalStorage('performanceData', initialPerformanceData));
 
   const [isClient, setIsClient] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -58,28 +60,23 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
         window.localStorage.setItem('backlogData', JSON.stringify(backlogData));
         window.localStorage.setItem('dailySummary', JSON.stringify(dailySummary));
         window.localStorage.setItem('hourlyBacklog', JSON.stringify(hourlyBacklog));
+        window.localStorage.setItem('performanceData', JSON.stringify(performanceData));
       } catch (error) {
         console.warn('Error writing to localStorage:', error);
       }
     }
-  }, [isClient, metrics, backlogData, dailySummary, hourlyBacklog]);
+  }, [isClient, metrics, backlogData, dailySummary, hourlyBacklog, performanceData]);
 
-  const performanceData = useMemo(() => {
-    const marketplaceData = backlogData.types[0];
-    if (!marketplaceData) {
-      return initialPerformanceData;
-    }
-    const pickerValue = marketplaceData.statuses.picked.order;
-    const packerValue = marketplaceData.statuses.packed.order;
-    // Simple automatic calculation for average hours based on picker count
+  const calculatedPerformanceData = useMemo(() => {
+    const pickerValue = performanceData.picker;
     const averageHours = pickerValue > 0 ? 2.5 + (pickerValue / 1000) : 2.5;
 
     return {
-      picker: pickerValue,
-      packer: packerValue,
+      picker: performanceData.picker,
+      packer: performanceData.packer,
       averageHours: averageHours,
     }
-  }, [backlogData]);
+  }, [performanceData]);
 
   const handleMetricsUpdate = (data: Partial<Metrics>) => {
     setMetrics((prevMetrics) => {
@@ -142,18 +139,27 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
     setIsDialogOpen(false);
   };
 
+  const handlePerformanceUpdate = (data: Partial<PerformanceData>) => {
+    setPerformanceData(prevData => ({
+      ...prevData,
+      ...data,
+    }));
+    setIsDialogOpen(false);
+  }
+
   const value = {
     metrics,
     backlogData,
     dailySummary,
     hourlyBacklog,
-    performanceData,
+    performanceData: calculatedPerformanceData,
     isClient,
     isDialogOpen,
     setIsDialogOpen,
     handleMetricsUpdate,
     handleBacklogUpdate,
-    handleHourlyBacklogUpdate
+    handleHourlyBacklogUpdate,
+    handlePerformanceUpdate
   }
 
   return <AdminContext.Provider value={value}>{children}</AdminContext.Provider>;

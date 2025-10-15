@@ -48,12 +48,21 @@ const hourlyBacklogSchema = z.object({
 
 type HourlyBacklogFormValues = z.infer<typeof hourlyBacklogSchema>;
 
+const performanceSchema = z.object({
+  picker: z.coerce.number().min(0),
+  packer: z.coerce.number().min(0),
+});
+
+type PerformanceFormValues = z.infer<typeof performanceSchema>;
+
 type AdminFormProps = {
   onMetricsSubmit: (data: MetricsFormValues) => void;
   onBacklogSubmit: (data: BacklogFormValues) => void;
   onHourlyBacklogSubmit: (data: HourlyBacklogFormValues) => void;
+  onPerformanceSubmit: (data: PerformanceFormValues) => void;
   backlogData: { types: { statuses: any }[] };
   hourlyData: { hour: string; value: number }[];
+  performanceData: { picker: number; packer: number; averageHours: number };
 };
 
 const MetricsForm = ({ onMetricsSubmit }: { onMetricsSubmit: (data: MetricsFormValues) => void }) => {
@@ -231,14 +240,59 @@ const HourlyBacklogForm = ({ onHourlyBacklogSubmit, hourlyData }: { onHourlyBack
   );
 };
 
+const PerformanceForm = ({ onPerformanceSubmit, performanceData }: { onPerformanceSubmit: (data: PerformanceFormValues) => void, performanceData: PerformanceFormValues }) => {
+  const form = useForm<PerformanceFormValues>({
+    resolver: zodResolver(performanceSchema),
+    defaultValues: {
+      picker: performanceData?.picker || 0,
+      packer: performanceData?.packer || 0,
+    },
+  });
 
-export default function AdminForm({ onMetricsSubmit, onBacklogSubmit, onHourlyBacklogSubmit, backlogData, hourlyData }: AdminFormProps) {
+  return (
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onPerformanceSubmit)} className="space-y-4 pt-4">
+        <FormField
+          control={form.control}
+          name="picker"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Picker</FormLabel>
+              <FormControl>
+                <Input type="number" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="packer"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Packer</FormLabel>
+              <FormControl>
+                <Input type="number" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <Button type="submit">Update Performance</Button>
+      </form>
+    </Form>
+  );
+};
+
+
+export default function AdminForm({ onMetricsSubmit, onBacklogSubmit, onHourlyBacklogSubmit, onPerformanceSubmit, backlogData, hourlyData, performanceData }: AdminFormProps) {
   return (
     <Tabs defaultValue="metrics" className="w-full">
-      <TabsList className="grid w-full grid-cols-3">
+      <TabsList className="grid w-full grid-cols-4">
         <TabsTrigger value="metrics">Metrics</TabsTrigger>
         <TabsTrigger value="backlog">Backlog</TabsTrigger>
         <TabsTrigger value="hourly">Hourly Backlog</TabsTrigger>
+        <TabsTrigger value="performance">Kinerja</TabsTrigger>
       </TabsList>
       <TabsContent value="metrics">
         <MetricsForm onMetricsSubmit={onMetricsSubmit} />
@@ -248,6 +302,9 @@ export default function AdminForm({ onMetricsSubmit, onBacklogSubmit, onHourlyBa
       </TabsContent>
       <TabsContent value="hourly">
         <HourlyBacklogForm onHourlyBacklogSubmit={onHourlyBacklogSubmit} hourlyData={hourlyData} />
+      </TabsContent>
+      <TabsContent value="performance">
+        <PerformanceForm onPerformanceSubmit={onPerformanceSubmit} performanceData={performanceData} />
       </TabsContent>
     </Tabs>
   );

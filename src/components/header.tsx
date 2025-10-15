@@ -18,8 +18,10 @@ export default function Header() {
         handleMetricsUpdate, 
         handleBacklogUpdate,
         handleHourlyBacklogUpdate, 
+        handlePerformanceUpdate,
         backlogData,
-        hourlyBacklog
+        hourlyBacklog,
+        performanceData
     } = useAdmin();
 
   return (
@@ -42,8 +44,10 @@ export default function Header() {
               onMetricsSubmit={handleMetricsUpdate} 
               onBacklogSubmit={handleBacklogUpdate} 
               onHourlyBacklogSubmit={handleHourlyBacklogUpdate}
+              onPerformanceSubmit={handlePerformanceUpdate}
               backlogData={backlogData}
               hourlyData={hourlyBacklog}
+              performanceData={performanceData}
             />
           </DialogContent>
         </Dialog>
