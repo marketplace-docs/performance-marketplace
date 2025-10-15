@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, Fragment } from 'react';
 import {
   Card,
   CardContent,
@@ -74,11 +74,11 @@ export default function Backlog({ data }: BacklogProps) {
                 </TableRow>
                 <TableRow>
                   {Array(4).fill(0).map((_, i) => (
-                    <>
+                    <Fragment key={i}>
                       <TableHead className="border-r">Order</TableHead>
                       <TableHead className="border-r">Item</TableHead>
                       <TableHead className={i === 3 ? "" : "border-r"}>Avg</TableHead>
-                    </>
+                    </Fragment>
                   ))}
                 </TableRow>
               </TableHeader>
