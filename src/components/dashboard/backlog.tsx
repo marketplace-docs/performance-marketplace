@@ -71,12 +71,7 @@ export default function Backlog({ data, hourlyData, performanceData }: BacklogPr
       </CardHeader>
       {isOpen && (
         <CardContent>
-          <div className="flex items-center gap-4 mb-4">
-            <Button>SHOW BY GROUP</Button>
-            <Button variant="default">SHOW BY DETAIL</Button>
-            <span className="text-sm font-medium text-muted-foreground">{data.date}</span>
-          </div>
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto pt-4">
             <Table className="min-w-full border">
               <TableHeader>
                 <TableRow>
