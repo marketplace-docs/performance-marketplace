@@ -80,9 +80,11 @@ export default function Home() {
         ...prevSummary,
         day1: { ...prevSummary.day1, actual: data.actual !== undefined ? data.actual : prevSummary.day1.actual },
       };
-      newDailySummary.day2.total = newDailySummary.day1.actual;
+      
       newDailySummary.day1.total = newDailySummary.day1.actual;
       newDailySummary.day2.actual = newDailySummary.day1.actual;
+      newDailySummary.day2.total = newDailySummary.day1.actual;
+
 
       return newDailySummary;
     });

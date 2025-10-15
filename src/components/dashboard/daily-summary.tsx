@@ -15,6 +15,9 @@ type DailySummaryProps = {
 };
 
 export default function DailySummary({ data }: DailySummaryProps) {
+  const day1 = data.day1 || { day: 1, actual: 0, total: 0 };
+  const day2 = data.day2 || { day: 2, actual: 0, total: 0 };
+
   return (
     <div className="w-full">
       <Table>
@@ -30,12 +33,12 @@ export default function DailySummary({ data }: DailySummaryProps) {
         </TableHeader>
         <TableBody>
           <TableRow>
-            <TableCell>{data.day1.day}</TableCell>
-            <TableCell>{data.day1.actual.toLocaleString()}</TableCell>
-            <TableCell>{data.day1.total.toLocaleString()}</TableCell>
-            <TableCell>{data.day2.day}</TableCell>
-            <TableCell>{data.day2.actual.toLocaleString()}</TableCell>
-            <TableCell>{data.day2.total.toLocaleString()}</TableCell>
+            <TableCell>{day1.day}</TableCell>
+            <TableCell>{(day1.actual || 0).toLocaleString()}</TableCell>
+            <TableCell>{(day1.total || 0).toLocaleString()}</TableCell>
+            <TableCell>{day2.day}</TableCell>
+            <TableCell>{(day2.actual || 0).toLocaleString()}</TableCell>
+            <TableCell>{(day2.total || 0).toLocaleString()}</TableCell>
           </TableRow>
         </TableBody>
       </Table>
