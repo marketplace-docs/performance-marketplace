@@ -13,23 +13,40 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-const formSchema = z.object({
+const metricsSchema = z.object({
   forecast: z.coerce.number().min(0),
   actual: z.coerce.number().min(0),
   oos: z.coerce.number().min(0),
   actualOOS: z.coerce.number().min(0),
 });
 
-type FormValues = z.infer<typeof formSchema>;
+type MetricsFormValues = z.infer<typeof metricsSchema>;
+
+const statusSchema = z.object({
+  order: z.coerce.number().min(0),
+  item: z.coerce.number().min(0),
+});
+
+const backlogSchema = z.object({
+  paymentAccepted: statusSchema,
+  inProgress: statusSchema,
+  picked: statusSchema,
+  packed: statusSchema,
+});
+
+type BacklogFormValues = z.infer<typeof backlogSchema>;
 
 type AdminFormProps = {
-  onDataSubmit: (data: FormValues) => void;
+  onMetricsSubmit: (data: MetricsFormValues) => void;
+  onBacklogSubmit: (data: BacklogFormValues) => void;
+  backlogData: { types: { statuses: any }[] };
 };
 
-export default function AdminForm({ onDataSubmit }: AdminFormProps) {
-  const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
+const MetricsForm = ({ onMetricsSubmit }: { onMetricsSubmit: (data: MetricsFormValues) => void }) => {
+  const form = useForm<MetricsFormValues>({
+    resolver: zodResolver(metricsSchema),
     defaultValues: {
       forecast: 0,
       actual: 0,
@@ -38,13 +55,9 @@ export default function AdminForm({ onDataSubmit }: AdminFormProps) {
     },
   });
 
-  function onSubmit(values: FormValues) {
-    onDataSubmit(values);
-  }
-
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 pt-4">
+      <form onSubmit={form.handleSubmit(onMetricsSubmit)} className="space-y-4 pt-4">
         <FormField
           control={form.control}
           name="forecast"
@@ -97,8 +110,87 @@ export default function AdminForm({ onDataSubmit }: AdminFormProps) {
             </FormItem>
           )}
         />
-        <Button type="submit">Update Data</Button>
+        <Button type="submit">Update Metrics</Button>
       </form>
     </Form>
+  );
+};
+
+const BacklogForm = ({ onBacklogSubmit, backlogData }: { onBacklogSubmit: (data: BacklogFormValues) => void, backlogData: { types: { statuses: any }[] } }) => {
+  const defaultValues = backlogData?.types?.[0]?.statuses || {};
+  const form = useForm<BacklogFormValues>({
+    resolver: zodResolver(backlogSchema),
+    defaultValues: {
+      paymentAccepted: { order: defaultValues.paymentAccepted?.order || 0, item: defaultValues.paymentAccepted?.item || 0 },
+      inProgress: { order: defaultValues.inProgress?.order || 0, item: defaultValues.inProgress?.item || 0 },
+      picked: { order: defaultValues.picked?.order || 0, item: defaultValues.picked?.item || 0 },
+      packed: { order: defaultValues.packed?.order || 0, item: defaultValues.packed?.item || 0 },
+    },
+  });
+
+  const statuses = [
+    { name: 'paymentAccepted', label: 'Payment Accepted' },
+    { name: 'inProgress', label: 'In Progress' },
+    { name: 'picked', label: 'Picked' },
+    { name: 'packed', label: 'Packed' },
+  ] as const;
+
+  return (
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onBacklogSubmit)} className="space-y-6 pt-4">
+        {statuses.map(status => (
+          <div key={status.name} className="space-y-2 p-3 border rounded-md">
+            <h3 className="font-medium">{status.label}</h3>
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name={`${status.name}.order`}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Order</FormLabel>
+                    <FormControl>
+                      <Input type="number" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name={`${status.name}.item`}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Item</FormLabel>
+                    <FormControl>
+                      <Input type="number" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+          </div>
+        ))}
+        <Button type="submit">Update Backlog</Button>
+      </form>
+    </Form>
+  );
+}
+
+
+export default function AdminForm({ onMetricsSubmit, onBacklogSubmit, backlogData }: AdminFormProps) {
+  return (
+    <Tabs defaultValue="metrics" className="w-full">
+      <TabsList className="grid w-full grid-cols-2">
+        <TabsTrigger value="metrics">Metrics</TabsTrigger>
+        <TabsTrigger value="backlog">Backlog</TabsTrigger>
+      </TabsList>
+      <TabsContent value="metrics">
+        <MetricsForm onMetricsSubmit={onMetricsSubmit} />
+      </TabsContent>
+      <TabsContent value="backlog">
+        <BacklogForm onBacklogSubmit={onBacklogSubmit} backlogData={backlogData} />
+      </TabsContent>
+    </Tabs>
   );
 }

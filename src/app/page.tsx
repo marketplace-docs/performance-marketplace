@@ -61,27 +61,25 @@ export default function Home() {
     }
   }, [isClient, metrics, backlogData, dailySummary]);
 
-  const handleDataUpdate = (data: Partial<Metrics>) => {
+  const handleMetricsUpdate = (data: Partial<Metrics>) => {
     setMetrics((prevMetrics) => {
       const newMetrics = { ...prevMetrics, ...data };
       
       const forecast = newMetrics.forecast || 0;
       const actual = newMetrics.actual || 0;
-      const oos = newMetrics.oos || 0;
-      const actualOOS = newMetrics.actualOOS || 0;
 
       newMetrics.fulfillmentRate = forecast > 0 ? (actual / forecast) * 100 : 0;
       newMetrics.progress = actual;
 
       newMetrics.actualVsForecast = forecast > 0 ? (actual / forecast) * 100 : 0;
-      newMetrics.oosVsForecast = forecast > 0 ? (oos / forecast) * 100 : 0;
-      newMetrics.actualOOSVsForecast = forecast > 0 ? (actualOOS / forecast) * 100 : 0;
+      newMetrics.oosVsForecast = forecast > 0 ? (newMetrics.oos / forecast) * 100 : 0;
+      newMetrics.actualOOSVsForecast = forecast > 0 ? (newMetrics.actualOOS / forecast) * 100 : 0;
 
       return newMetrics;
     });
 
     setDailySummary((prevSummary) => {
-      const newDay2 = { ...prevSummary.day1, day: 2 };
+       const newDay2 = { ...prevSummary.day1, day: 2 };
 
       const newDay1 = {
         day: 1,
@@ -96,6 +94,29 @@ export default function Home() {
     });
     setIsDialogOpen(false);
   };
+
+  const handleBacklogUpdate = (data: any) => {
+    setBacklogData(prevData => {
+      const newTypes = [...prevData.types];
+      const marketplaceData = newTypes[0];
+
+      const updateStatus = (status: 'paymentAccepted' | 'inProgress' | 'picked' | 'packed') => {
+        const order = data[status]?.order ?? marketplaceData.statuses[status].order;
+        const item = data[status]?.item ?? marketplaceData.statuses[status].item;
+        const avg = order > 0 ? item / order : 0;
+        marketplaceData.statuses[status] = { order, item, avg };
+      };
+
+      updateStatus('paymentAccepted');
+      updateStatus('inProgress');
+      updateStatus('picked');
+      updateStatus('packed');
+
+      return { ...prevData, types: newTypes };
+    });
+    setIsDialogOpen(false);
+  };
+
 
   if (!isClient) {
     return null;
@@ -122,7 +143,7 @@ export default function Home() {
                 <DialogHeader>
                   <DialogTitle>Admin Controls</DialogTitle>
                 </DialogHeader>
-                <AdminForm onDataSubmit={handleDataUpdate} />
+                <AdminForm onMetricsSubmit={handleMetricsUpdate} onBacklogSubmit={handleBacklogUpdate} backlogData={backlogData}/>
               </DialogContent>
             </Dialog>
           </div>
