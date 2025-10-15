@@ -29,7 +29,11 @@ const formSchema = z.object({
   remarks: z.string().optional(),
 });
 
-export default function AdminForm() {
+type AdminFormProps = {
+  onDataSubmit: (dailyForecast: number, oosData: number) => void;
+};
+
+export default function AdminForm({ onDataSubmit }: AdminFormProps) {
   const { toast } = useToast();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -41,7 +45,7 @@ export default function AdminForm() {
   });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values);
+    onDataSubmit(values.dailyForecast, values.oosData);
     toast({
       title: "Data Submitted",
       description: "Forecast monitoring data has been successfully updated.",

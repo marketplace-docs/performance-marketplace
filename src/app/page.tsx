@@ -1,3 +1,6 @@
+'use client';
+
+import { useState } from 'react';
 import Header from "@/components/header";
 import KeyMetricsSummary from "@/components/dashboard/key-metrics-summary";
 import OrderStatusBacklog from "@/components/dashboard/order-status-backlog";
@@ -5,13 +8,36 @@ import DailyBreakdown from "@/components/dashboard/daily-breakdown";
 import FulfillmentCharts from "@/components/dashboard/fulfillment-charts";
 import AdminForm from "@/components/dashboard/admin-form";
 import {
-  keyMetrics,
-  orderStatusBacklog,
-  dailyBreakdown,
-  chartData,
+  keyMetrics as initialKeyMetrics,
+  orderStatusBacklog as initialOrderStatusBacklog,
+  dailyBreakdown as initialDailyBreakdown,
+  chartData as initialChartData,
 } from "@/lib/data";
 
+type KeyMetrics = typeof initialKeyMetrics;
+type ChartData = typeof initialChartData;
+
 export default function Home() {
+  const [keyMetrics, setKeyMetrics] = useState(initialKeyMetrics);
+  const [orderStatusBacklog, setOrderStatusBacklog] = useState(initialOrderStatusBacklog);
+  const [dailyBreakdown, setDailyBreakdown] = useState(initialDailyBreakdown);
+  const [chartData, setChartData] = useState(initialChartData);
+
+  const handleDataUpdate = (newForecast: number, newOos: number) => {
+    setKeyMetrics((prevMetrics) => {
+      const newDetails = prevMetrics.details.map((metric) => {
+        if (metric.id === "forecast") {
+          return { ...metric, value: newForecast.toLocaleString() };
+        }
+        if (metric.id === "oosOrders") {
+          return { ...metric, value: newOos.toLocaleString() };
+        }
+        return metric;
+      });
+      return { ...prevMetrics, details: newDetails };
+    });
+  };
+
   return (
     <div className="flex min-h-screen w-full flex-col bg-background">
       <Header />
@@ -27,7 +53,7 @@ export default function Home() {
               barChartData={chartData.orderStatus}
               lineChartData={chartData.dailyProgress}
             />
-            <AdminForm />
+            <AdminForm onDataSubmit={handleDataUpdate} />
           </div>
         </div>
       </main>
