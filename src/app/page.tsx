@@ -34,22 +34,33 @@ const getFromLocalStorage = (key: string, initialValue: any) => {
 };
 
 export default function Home() {
-  const [keyMetrics, setKeyMetrics] = useState<KeyMetrics>(() => getFromLocalStorage("keyMetrics", initialKeyMetrics));
-  const [orderStatusBacklog, setOrderStatusBacklog] = useState<OrderStatusBacklog>(() => getFromLocalStorage("orderStatusBacklog", initialOrderStatusBacklog));
-  const [dailyBreakdown, setDailyBreakdown] = useState<DailyBreakdown>(() => getFromLocalStorage("dailyBreakdown", initialDailyBreakdown));
-  const [chartData, setChartData] = useState<ChartData>(() => getFromLocalStorage("chartData", initialChartData));
+  const [keyMetrics, setKeyMetrics] = useState<KeyMetrics>(initialKeyMetrics);
+  const [orderStatusBacklog, setOrderStatusBacklog] = useState<OrderStatusBacklog>(initialOrderStatusBacklog);
+  const [dailyBreakdown, setDailyBreakdown] = useState<DailyBreakdown>(initialDailyBreakdown);
+  const [chartData, setChartData] = useState<ChartData>(initialChartData);
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setKeyMetrics(getFromLocalStorage("keyMetrics", initialKeyMetrics));
+    setOrderStatusBacklog(getFromLocalStorage("orderStatusBacklog", initialOrderStatusBacklog));
+    setDailyBreakdown(getFromLocalStorage("dailyBreakdown", initialDailyBreakdown));
+    setChartData(getFromLocalStorage("chartData", initialChartData));
+    setIsClient(true);
+  }, []);
 
   // Effect to save state to localStorage whenever it changes
   useEffect(() => {
-    try {
-      window.localStorage.setItem("keyMetrics", JSON.stringify(keyMetrics));
-      window.localStorage.setItem("orderStatusBacklog", JSON.stringify(orderStatusBacklog));
-      window.localStorage.setItem("dailyBreakdown", JSON.stringify(dailyBreakdown));
-      window.localStorage.setItem("chartData", JSON.stringify(chartData));
-    } catch (error) {
-      console.warn('Error writing to localStorage:', error);
+    if (isClient) {
+      try {
+        window.localStorage.setItem("keyMetrics", JSON.stringify(keyMetrics));
+        window.localStorage.setItem("orderStatusBacklog", JSON.stringify(orderStatusBacklog));
+        window.localStorage.setItem("dailyBreakdown", JSON.stringify(dailyBreakdown));
+        window.localStorage.setItem("chartData", JSON.stringify(chartData));
+      } catch (error) {
+        console.warn('Error writing to localStorage:', error);
+      }
     }
-  }, [keyMetrics, orderStatusBacklog, dailyBreakdown, chartData]);
+  }, [isClient, keyMetrics, orderStatusBacklog, dailyBreakdown, chartData]);
 
 
   const handleDataUpdate = (newForecast: number, newOos: number) => {
