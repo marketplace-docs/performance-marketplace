@@ -1,6 +1,6 @@
 'use client';
 
-import { Bar, BarChart, CartesianGrid, XAxis, YAxis, ResponsiveContainer, Tooltip } from 'recharts';
+import { Bar, BarChart, CartesianGrid, XAxis, YAxis, ResponsiveContainer, Tooltip, LabelList } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 type HourlyData = {
@@ -25,7 +25,7 @@ export default function BacklogChart({ data }: BacklogChartProps) {
       </div>
       <div className="h-[300px]">
         <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={data} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
+          <BarChart data={data} margin={{ top: 20, right: 20, left: -10, bottom: 5 }}>
             <CartesianGrid strokeDasharray="3 3" vertical={false} />
             <XAxis dataKey="hour" tick={{ fontSize: 12 }} tickLine={false} axisLine={false} />
             <YAxis tick={{ fontSize: 12 }} tickLine={false} axisLine={false} domain={[0, 625]} />
@@ -35,7 +35,9 @@ export default function BacklogChart({ data }: BacklogChartProps) {
                 borderColor: 'hsl(var(--border))',
               }}
             />
-            <Bar dataKey="value" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
+            <Bar dataKey="value" fill="hsl(var(--destructive))" radius={[4, 4, 0, 0]}>
+                <LabelList dataKey="value" position="top" style={{ fill: 'hsl(var(--foreground))', fontSize: 12 }} />
+            </Bar>
           </BarChart>
         </ResponsiveContainer>
       </div>
