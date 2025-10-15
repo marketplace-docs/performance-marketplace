@@ -1,12 +1,13 @@
 'use client';
 
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { initialMetrics, initialBacklogData, initialDailySummary, initialHourlyBacklog } from '@/lib/data';
+import { createContext, useContext, useState, useEffect, ReactNode, useMemo } from 'react';
+import { initialMetrics, initialBacklogData, initialDailySummary, initialHourlyBacklog, initialPerformanceData } from '@/lib/data';
 
 type Metrics = typeof initialMetrics;
 type BacklogData = typeof initialBacklogData;
 type DailySummaryData = typeof initialDailySummary;
 type HourlyBacklogData = typeof initialHourlyBacklog;
+type PerformanceData = typeof initialPerformanceData;
 
 const getFromLocalStorage = (key: string, initialValue: any) => {
   if (typeof window === 'undefined') {
@@ -26,6 +27,7 @@ type AdminContextType = {
   backlogData: BacklogData;
   dailySummary: DailySummaryData;
   hourlyBacklog: HourlyBacklogData;
+  performanceData: PerformanceData;
   isClient: boolean;
   isDialogOpen: boolean;
   setIsDialogOpen: (isOpen: boolean) => void;
@@ -61,6 +63,18 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
       }
     }
   }, [isClient, metrics, backlogData, dailySummary, hourlyBacklog]);
+
+  const performanceData = useMemo(() => {
+    const marketplaceData = backlogData.types[0];
+    if (!marketplaceData) {
+      return initialPerformanceData;
+    }
+    return {
+      picker: marketplaceData.statuses.picked.order,
+      packer: marketplaceData.statuses.packed.order,
+      averageHours: 2.5, // This is static for now as per requirement
+    }
+  }, [backlogData]);
 
   const handleMetricsUpdate = (data: Partial<Metrics>) => {
     setMetrics((prevMetrics) => {
@@ -128,6 +142,7 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
     backlogData,
     dailySummary,
     hourlyBacklog,
+    performanceData,
     isClient,
     isDialogOpen,
     setIsDialogOpen,

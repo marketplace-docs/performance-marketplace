@@ -57,6 +57,12 @@ export const initialHourlyBacklog = [
   { hour: '23:00', value: 0 },
 ];
 
+export const initialPerformanceData = {
+  picker: 206,
+  packer: 28,
+  averageHours: 2.5,
+};
+
 
 // Deprecated data, will be removed in future versions
 export const keyMetrics = { details: [], progress: 0 };

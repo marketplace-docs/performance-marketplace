@@ -19,7 +19,7 @@ type Metrics = {
 };
 
 export default function Home() {
-  const { metrics, backlogData, dailySummary, hourlyBacklog, isClient } = useAdmin();
+  const { metrics, backlogData, dailySummary, hourlyBacklog, performanceData, isClient } = useAdmin();
 
   if (!isClient) {
     return null;
@@ -35,7 +35,7 @@ export default function Home() {
           <DailySummary data={dailySummary} />
         </div>
       </div>
-      <Backlog data={backlogData} hourlyData={hourlyBacklog} />
+      <Backlog data={backlogData} hourlyData={hourlyBacklog} performanceData={performanceData} />
     </main>
   );
 }
