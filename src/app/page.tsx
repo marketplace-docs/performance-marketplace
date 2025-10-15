@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Header from "@/components/header";
 import KeyMetricsSummary from "@/components/dashboard/key-metrics-summary";
 import OrderStatusBacklog from "@/components/dashboard/order-status-backlog";
@@ -15,13 +15,42 @@ import {
 } from "@/lib/data";
 
 type KeyMetrics = typeof initialKeyMetrics;
+type OrderStatusBacklog = typeof initialOrderStatusBacklog;
+type DailyBreakdown = typeof initialDailyBreakdown;
 type ChartData = typeof initialChartData;
 
+// Helper function to get data from localStorage
+const getFromLocalStorage = (key: string, initialValue: any) => {
+  if (typeof window === 'undefined') {
+    return initialValue;
+  }
+  try {
+    const item = window.localStorage.getItem(key);
+    return item ? JSON.parse(item) : initialValue;
+  } catch (error) {
+    console.warn(`Error reading localStorage key “${key}”:`, error);
+    return initialValue;
+  }
+};
+
 export default function Home() {
-  const [keyMetrics, setKeyMetrics] = useState(initialKeyMetrics);
-  const [orderStatusBacklog, setOrderStatusBacklog] = useState(initialOrderStatusBacklog);
-  const [dailyBreakdown, setDailyBreakdown] = useState(initialDailyBreakdown);
-  const [chartData, setChartData] = useState(initialChartData);
+  const [keyMetrics, setKeyMetrics] = useState<KeyMetrics>(() => getFromLocalStorage("keyMetrics", initialKeyMetrics));
+  const [orderStatusBacklog, setOrderStatusBacklog] = useState<OrderStatusBacklog>(() => getFromLocalStorage("orderStatusBacklog", initialOrderStatusBacklog));
+  const [dailyBreakdown, setDailyBreakdown] = useState<DailyBreakdown>(() => getFromLocalStorage("dailyBreakdown", initialDailyBreakdown));
+  const [chartData, setChartData] = useState<ChartData>(() => getFromLocalStorage("chartData", initialChartData));
+
+  // Effect to save state to localStorage whenever it changes
+  useEffect(() => {
+    try {
+      window.localStorage.setItem("keyMetrics", JSON.stringify(keyMetrics));
+      window.localStorage.setItem("orderStatusBacklog", JSON.stringify(orderStatusBacklog));
+      window.localStorage.setItem("dailyBreakdown", JSON.stringify(dailyBreakdown));
+      window.localStorage.setItem("chartData", JSON.stringify(chartData));
+    } catch (error) {
+      console.warn('Error writing to localStorage:', error);
+    }
+  }, [keyMetrics, orderStatusBacklog, dailyBreakdown, chartData]);
+
 
   const handleDataUpdate = (newForecast: number, newOos: number) => {
     setKeyMetrics((prevMetrics) => {
