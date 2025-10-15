@@ -1,93 +1,34 @@
-
-export const keyMetrics = {
-  details: [
-    {
-      id: "forecast",
-      title: "Forecast",
-      value: "0",
-    },
-    {
-      id: "actualPacked",
-      title: "Actual Packed",
-      value: "0",
-      trend: "neutral" as const,
-      trendLabel: "",
-    },
-    {
-      id: "oosOrders",
-      title: "OOS Orders",
-      value: "0",
-      trend: "neutral" as const,
-      trendLabel: "",
-    },
-    {
-      id: "fulfillmentRate",
-      title: "Fulfillment Rate",
-      value: "0%",
-      trend: "neutral" as const,
-      trendLabel: "",
-    },
-    {
-      id: "actualOOS",
-      title: "Actual OOS %",
-      value: "0%",
-      trend: "neutral" as const,
-      trendLabel: "",
-    },
-  ],
+export const initialMetrics = {
+  forecast: 20051,
+  actual: 0,
+  oos: 0,
+  actualOOS: 0,
+  fulfillmentRate: 0,
   progress: 0,
 };
 
-export const orderStatusBacklog = [
-  {
-    status: "Payment Accepted",
-    orderCount: 0,
-    itemCount: 0,
-    avgItemsPerOrder: 0,
-  },
-  {
-    status: "In Progress",
-    orderCount: 0,
-    itemCount: 0,
-    avgItemsPerOrder: 0,
-  },
-  {
-    status: "Picked",
-    orderCount: 0,
-    itemCount: 0,
-    avgItemsPerOrder: 0,
-  },
-  {
-    status: "Packed",
-    orderCount: 0,
-    itemCount: 0,
-    avgItemsPerOrder: 0,
-  },
-];
-
-export const dailyBreakdown = [
-  {
-    day: "Today",
-    actualPacked: 0,
-    totalPacked: 0,
-    fulfillmentPercentage: 0,
-  },
-];
-
-export const chartData = {
-  orderStatus: [
-    { status: "Payment", count: 0 },
-    { status: "Progress", count: 0 },
-    { status: "Picked", count: 0 },
-    { status: "Packed", count: 0 },
-  ],
-  dailyProgress: [
-    { day: "Mon", forecast: 0, actual: 0 },
-    { day: "Tue", forecast: 0, actual: 0 },
-    { day: "Wed", forecast: 0, actual: 0 },
-    { day: "Thu", forecast: 0, actual: 0 },
-    { day: "Fri", forecast: 0, actual: 0 },
-    { day: "Sat", forecast: 0, actual: 0 },
-    { day: "Sun", forecast: 0, actual: 0 },
+export const initialBacklogData = {
+  date: "ORDERS STATUS FRIDAY",
+  types: [
+    {
+      name: "Marketplace",
+      statuses: {
+        paymentAccepted: { order: 298, item: 403, avg: 1.4 },
+        inProgress: { order: 296, item: 399, avg: 1.3 },
+        picked: { order: 206, item: 242, avg: 1.2 },
+        packed: { order: 28, item: 38, avg: 1.4 },
+      },
+    },
   ],
 };
+
+export const initialDailySummary = {
+  day1: { day: 1, actual: 0 },
+  day2: { day: 2, total: 0 },
+};
+
+// Deprecated data, will be removed in future versions
+export const keyMetrics = { details: [], progress: 0 };
+export const orderStatusBacklog = [];
+export const dailyBreakdown = [];
+export const chartData = { orderStatus: [], dailyProgress: [] };
