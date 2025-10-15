@@ -76,17 +76,20 @@ export default function Home() {
     });
 
     setDailySummary((prevSummary) => {
-      const newDailySummary = {
-        ...prevSummary,
-        day1: { ...prevSummary.day1, actual: data.actual !== undefined ? data.actual : prevSummary.day1.actual },
+      // Data "Day 1" sebelumnya menjadi data "Day 2" yang baru
+      const newDay2 = { ...prevSummary.day1, day: 2 };
+
+      // Data "Day 1" yang baru mengambil dari input form
+      const newDay1 = {
+        day: 1,
+        actual: data.actual !== undefined ? data.actual : prevSummary.day1.actual,
+        total: data.actual !== undefined ? data.actual : prevSummary.day1.actual,
       };
-      
-      newDailySummary.day1.total = newDailySummary.day1.actual;
-      newDailySummary.day2.actual = newDailySummary.day1.actual;
-      newDailySummary.day2.total = newDailySummary.day1.actual;
 
-
-      return newDailySummary;
+      return {
+        day1: newDay1,
+        day2: newDay2,
+      };
     });
   };
 
