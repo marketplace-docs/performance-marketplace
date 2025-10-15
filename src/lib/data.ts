@@ -1,10 +1,13 @@
 export const initialMetrics = {
-  forecast: 20051,
+  forecast: 0,
   actual: 0,
   oos: 0,
   actualOOS: 0,
   fulfillmentRate: 0,
   progress: 0,
+  actualVsForecast: 0,
+  oosVsForecast: 0,
+  actualOOSVsForecast: 0,
 };
 
 export const initialBacklogData = {
@@ -23,8 +26,8 @@ export const initialBacklogData = {
 };
 
 export const initialDailySummary = {
-  day1: { day: 1, actual: 0 },
-  day2: { day: 2, total: 0 },
+  day1: { day: 1, actual: 0, total: 0 },
+  day2: { day: 2, actual: 0, total: 0 },
 };
 
 // Deprecated data, will be removed in future versions

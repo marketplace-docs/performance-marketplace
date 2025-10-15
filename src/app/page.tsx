@@ -37,9 +37,11 @@ export default function Home() {
 
   useEffect(() => {
     setIsClient(true);
-    setMetrics(getFromLocalStorage('metrics', initialMetrics));
-    setBacklogData(getFromLocalStorage('backlogData', initialBacklogData));
-    setDailySummary(getFromLocalStorage('dailySummary', initialDailySummary));
+    if (typeof window !== 'undefined') {
+      setMetrics(getFromLocalStorage('metrics', initialMetrics));
+      setBacklogData(getFromLocalStorage('backlogData', initialBacklogData));
+      setDailySummary(getFromLocalStorage('dailySummary', initialDailySummary));
+    }
   }, []);
 
   useEffect(() => {
@@ -54,28 +56,52 @@ export default function Home() {
     }
   }, [isClient, metrics, backlogData, dailySummary]);
 
-  const handleDataUpdate = (newForecast: number, newOos: number) => {
-    setMetrics((prevMetrics) => ({
-      ...prevMetrics,
-      forecast: newForecast,
-      oos: newOos,
-    }));
+  const handleDataUpdate = (data: Partial<Metrics>) => {
+    setMetrics((prevMetrics) => {
+      const newMetrics = { ...prevMetrics, ...data };
+      
+      const forecast = newMetrics.forecast || 0;
+      const actual = newMetrics.actual || 0;
+      const oos = newMetrics.oos || 0;
+      const actualOOS = newMetrics.actualOOS || 0;
+
+      newMetrics.fulfillmentRate = forecast > 0 ? (actual / forecast) * 100 : 0;
+      newMetrics.progress = actual;
+
+      newMetrics.actualVsForecast = forecast > 0 ? (actual / forecast) * 100 : 0;
+      newMetrics.oosVsForecast = forecast > 0 ? (oos / forecast) * 100 : 0;
+      newMetrics.actualOOSVsForecast = forecast > 0 ? (actualOOS / forecast) * 100 : 0;
+
+      return newMetrics;
+    });
+
+    setDailySummary((prevSummary) => {
+      const newDailySummary = {
+        ...prevSummary,
+        day1: { ...prevSummary.day1, actual: data.actual !== undefined ? data.actual : prevSummary.day1.actual },
+      };
+      newDailySummary.day2.total = newDailySummary.day1.actual;
+      newDailySummary.day1.total = newDailySummary.day1.actual;
+      newDailySummary.day2.actual = newDailySummary.day1.actual;
+
+      return newDailySummary;
+    });
   };
 
   return (
     <div className="flex min-h-screen w-full flex-col bg-background text-foreground">
       <Header />
       <main className="flex-1 space-y-4 p-4 md:p-8">
-        <div className="flex items-start justify-between gap-4">
-          <KeyMetrics metrics={metrics} />
-          <DailySummary data={dailySummary} />
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          <div className="lg:col-span-2">
+            <KeyMetrics metrics={metrics} />
+          </div>
+          <div className="flex flex-col gap-4">
+            <DailySummary data={dailySummary} />
+            <AdminForm onDataSubmit={handleDataUpdate} />
+          </div>
         </div>
         <Backlog data={backlogData} />
-
-        {/* Admin Form can be re-integrated if needed */}
-        {/* <div className="max-w-md ml-auto">
-          <AdminForm onDataSubmit={handleDataUpdate} />
-        </div> */}
       </main>
     </div>
   );
