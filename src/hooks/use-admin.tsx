@@ -1,11 +1,12 @@
 'use client';
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { initialMetrics, initialBacklogData, initialDailySummary } from '@/lib/data';
+import { initialMetrics, initialBacklogData, initialDailySummary, initialHourlyBacklog } from '@/lib/data';
 
 type Metrics = typeof initialMetrics;
 type BacklogData = typeof initialBacklogData;
 type DailySummaryData = typeof initialDailySummary;
+type HourlyBacklogData = typeof initialHourlyBacklog;
 
 const getFromLocalStorage = (key: string, initialValue: any) => {
   if (typeof window === 'undefined') {
@@ -24,6 +25,7 @@ type AdminContextType = {
   metrics: Metrics;
   backlogData: BacklogData;
   dailySummary: DailySummaryData;
+  hourlyBacklog: HourlyBacklogData;
   isClient: boolean;
   isDialogOpen: boolean;
   setIsDialogOpen: (isOpen: boolean) => void;
@@ -37,6 +39,8 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
   const [metrics, setMetrics] = useState<Metrics>(() => getFromLocalStorage('metrics', initialMetrics));
   const [backlogData, setBacklogData] = useState<BacklogData>(() => getFromLocalStorage('backlogData', initialBacklogData));
   const [dailySummary, setDailySummary] = useState<DailySummaryData>(() => getFromLocalStorage('dailySummary', initialDailySummary));
+  const [hourlyBacklog, setHourlyBacklog] = useState<HourlyBacklogData>(() => getFromLocalStorage('hourlyBacklog', initialHourlyBacklog));
+
   const [isClient, setIsClient] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
@@ -50,11 +54,12 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
         window.localStorage.setItem('metrics', JSON.stringify(metrics));
         window.localStorage.setItem('backlogData', JSON.stringify(backlogData));
         window.localStorage.setItem('dailySummary', JSON.stringify(dailySummary));
+        window.localStorage.setItem('hourlyBacklog', JSON.stringify(hourlyBacklog));
       } catch (error) {
         console.warn('Error writing to localStorage:', error);
       }
     }
-  }, [isClient, metrics, backlogData, dailySummary]);
+  }, [isClient, metrics, backlogData, dailySummary, hourlyBacklog]);
 
   const handleMetricsUpdate = (data: Partial<Metrics>) => {
     setMetrics((prevMetrics) => {
@@ -116,6 +121,7 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
     metrics,
     backlogData,
     dailySummary,
+    hourlyBacklog,
     isClient,
     isDialogOpen,
     setIsDialogOpen,
