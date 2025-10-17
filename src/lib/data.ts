@@ -1,13 +1,7 @@
 export const initialMetrics = {
   forecast: 0,
   actual: 0,
-  oos: 0,
-  actualOOS: 0,
   fulfillmentRate: 0,
-  progress: 0,
-  actualVsForecast: 0,
-  oosVsForecast: 0,
-  actualOOSVsForecast: 0,
 };
 
 export const initialBacklogData = {

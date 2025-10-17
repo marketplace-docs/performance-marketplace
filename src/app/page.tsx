@@ -9,13 +9,7 @@ import { useAdmin } from '@/hooks/use-admin';
 type Metrics = {
   forecast: number;
   actual: number;
-  oos: number;
-  actualOOS: number;
   fulfillmentRate: number;
-  progress: number;
-  actualVsForecast: number;
-  oosVsForecast: number;
-  actualOOSVsForecast: number;
 };
 
 export default function Home() {

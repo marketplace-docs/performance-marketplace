@@ -19,8 +19,6 @@ import { ScrollArea } from '../ui/scroll-area';
 const metricsSchema = z.object({
   forecast: z.coerce.number().min(0),
   actual: z.coerce.number().min(0),
-  oos: z.coerce.number().min(0),
-  actualOOS: z.coerce.number().min(0),
 });
 
 type MetricsFormValues = z.infer<typeof metricsSchema>;
@@ -71,8 +69,6 @@ const MetricsForm = ({ onMetricsSubmit }: { onMetricsSubmit: (data: MetricsFormV
     defaultValues: {
       forecast: 0,
       actual: 0,
-      oos: 0,
-      actualOOS: 0,
     },
   });
 
@@ -97,33 +93,7 @@ const MetricsForm = ({ onMetricsSubmit }: { onMetricsSubmit: (data: MetricsFormV
           name="actual"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Actual</FormLabel>
-              <FormControl>
-                <Input type="number" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="oos"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>OOS</FormLabel>
-              <FormControl>
-                <Input type="number" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="actualOOS"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Actual OOS</FormLabel>
+              <FormLabel>Actual Order</FormLabel>
               <FormControl>
                 <Input type="number" {...field} />
               </FormControl>

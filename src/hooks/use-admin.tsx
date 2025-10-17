@@ -69,20 +69,14 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
 
   const handleMetricsUpdate = (data: Partial<Metrics>) => {
     setMetrics((prevMetrics) => {
-      const newMetrics = { ...prevMetrics, ...data };
-      
-      const forecast = newMetrics.forecast || 0;
-      const actual = newMetrics.actual || 0;
-
-      newMetrics.fulfillmentRate = forecast > 0 ? (actual / forecast) * 100 : 0;
-      newMetrics.progress = actual;
-
-      newMetrics.actualVsForecast = forecast > 0 ? (actual / forecast) * 100 : 0;
-      newMetrics.oosVsForecast = forecast > 0 ? (newMetrics.oos / forecast) * 100 : 0;
-      newMetrics.actualOOSVsForecast = forecast > 0 ? (newMetrics.actualOOS / forecast) * 100 : 0;
-
-      return newMetrics;
-    });
+        const newMetrics = { ...prevMetrics, ...data };
+        const forecast = newMetrics.forecast || 0;
+        const day1Total = dailySummary.day1.total || 0;
+  
+        newMetrics.fulfillmentRate = forecast > 0 ? (day1Total / forecast) * 100 : 0;
+  
+        return newMetrics;
+      });
 
     setDailySummary((prevSummary) => {
        const newDay2 = { ...prevSummary.day1, day: 2 };
