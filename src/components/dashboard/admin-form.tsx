@@ -62,7 +62,7 @@ type AdminFormProps = {
   onPerformanceSubmit: (data: PerformanceFormValues) => void;
   backlogData: { types: { statuses: any }[] };
   hourlyData: { hour: string; value: number }[];
-  performanceData: { picker: number; packer: number; averageHours: number };
+  performanceData: { picker: number; packer: number; };
 };
 
 const MetricsForm = ({ onMetricsSubmit }: { onMetricsSubmit: (data: MetricsFormValues) => void }) => {

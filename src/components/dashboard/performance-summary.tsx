@@ -6,7 +6,6 @@ type PerformanceSummaryProps = {
     data: {
         picker: number;
         packer: number;
-        averageHours: number;
     }
 }
 
@@ -22,7 +21,7 @@ export default function PerformanceSummary({ data }: PerformanceSummaryProps) {
         <div className="my-6 flex gap-4 justify-between">
             <PerformanceSummaryItem label="Picker" value={data.picker.toLocaleString()} />
             <PerformanceSummaryItem label="Packer" value={data.packer.toLocaleString()} />
-            <PerformanceSummaryItem label="Average Hours" value={data.averageHours.toFixed(1)} />
+            <PerformanceSummaryItem label="Total Packed" value={data.packer.toLocaleString()} />
         </div>
     );
 }

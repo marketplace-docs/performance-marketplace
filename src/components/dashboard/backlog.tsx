@@ -44,7 +44,6 @@ type HourlyData = {
 type PerformanceData = {
   picker: number;
   packer: number;
-  averageHours: number;
 }
 
 type BacklogProps = {

@@ -11,7 +11,6 @@ export const initialMetrics = {
 };
 
 export const initialBacklogData = {
-  date: "ORDERS STATUS FRIDAY",
   types: [
     {
       name: "Marketplace",
@@ -60,7 +59,6 @@ export const initialHourlyBacklog = [
 export const initialPerformanceData = {
   picker: 206,
   packer: 28,
-  averageHours: 2.5,
 };
 
 

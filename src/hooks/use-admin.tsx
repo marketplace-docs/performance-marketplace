@@ -7,7 +7,7 @@ type Metrics = typeof initialMetrics;
 type BacklogData = typeof initialBacklogData;
 type DailySummaryData = typeof initialDailySummary;
 type HourlyBacklogData = typeof initialHourlyBacklog;
-type PerformanceData = typeof initialPerformanceData;
+type PerformanceData = Omit<typeof initialPerformanceData, 'averageHours'>;
 
 const getFromLocalStorage = (key: string, initialValue: any) => {
   if (typeof window === 'undefined') {
@@ -66,17 +66,6 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
       }
     }
   }, [isClient, metrics, backlogData, dailySummary, hourlyBacklog, performanceData]);
-
-  const calculatedPerformanceData = useMemo(() => {
-    const pickerValue = performanceData.picker;
-    const averageHours = pickerValue > 0 ? 2.5 + (pickerValue / 1000) : 2.5;
-
-    return {
-      picker: performanceData.picker,
-      packer: performanceData.packer,
-      averageHours: averageHours,
-    }
-  }, [performanceData]);
 
   const handleMetricsUpdate = (data: Partial<Metrics>) => {
     setMetrics((prevMetrics) => {
@@ -152,7 +141,7 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
     backlogData,
     dailySummary,
     hourlyBacklog,
-    performanceData: calculatedPerformanceData,
+    performanceData: performanceData,
     isClient,
     isDialogOpen,
     setIsDialogOpen,
