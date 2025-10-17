@@ -24,7 +24,7 @@ export default function BacklogChart({ data }: BacklogChartProps) {
         {data.map((item) => (
           <div key={item.hour} className="rounded-lg border bg-card text-card-foreground shadow-sm p-2">
             <div className="text-xs text-muted-foreground">{item.hour}</div>
-            <div className="font-bold">{formatNumber(item.value)}</div>
+            <div className="font-bold text-destructive">{formatNumber(item.value)}</div>
           </div>
         ))}
       </div>
