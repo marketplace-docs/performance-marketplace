@@ -65,7 +65,7 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
         
         const newDailySummary = {
           day1: { day: 1, actual: totalPacked, total: totalPacked },
-          day2: { day: 2, actual: dailySummary.day1.actual, total: dailySummary.day1.total },
+          day2: { day: 2, actual: 0, total: 0 },
         };
 
         if (JSON.stringify(newMetrics) !== JSON.stringify(metrics)) {
@@ -94,7 +94,7 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
     });
     setDailySummary({
         day1: { day: 1, actual: totalPacked, total: totalPacked },
-        day2: { day: 2, actual: dailySummary.day1.actual, total: dailySummary.day1.total },
+        day2: { day: 2, actual: 0, total: 0 },
     });
     setIsDialogOpen(false);
   };
