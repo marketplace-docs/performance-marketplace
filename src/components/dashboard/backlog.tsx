@@ -49,7 +49,6 @@ type PerformanceData = {
 
 type BacklogProps = {
   data: {
-    date: string;
     types: DataType[];
   };
   hourlyData: HourlyData;
@@ -62,12 +61,10 @@ export default function Backlog({ data, hourlyData, performanceData }: BacklogPr
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
-        <div className="flex items-center gap-4">
-          <CardTitle>BACKLOG</CardTitle>
-          <Button variant="outline" size="icon" onClick={() => setIsOpen(!isOpen)}>
+        <CardTitle>BACKLOG</CardTitle>
+        <Button variant="outline" size="icon" onClick={() => setIsOpen(!isOpen)}>
             {isOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-          </Button>
-        </div>
+        </Button>
       </CardHeader>
       {isOpen && (
         <CardContent>
