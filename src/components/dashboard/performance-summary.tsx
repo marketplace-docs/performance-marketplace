@@ -7,6 +7,7 @@ type PerformanceSummaryProps = {
         picker: number;
         packer: number;
         totalPacked: number;
+        averageHoursPacked: number;
     }
 }
 
@@ -23,6 +24,7 @@ export default function PerformanceSummary({ data }: PerformanceSummaryProps) {
             <PerformanceSummaryItem label="Picker" value={data.picker.toLocaleString()} />
             <PerformanceSummaryItem label="Packer" value={data.packer.toLocaleString()} />
             <PerformanceSummaryItem label="Total Packed" value={data.totalPacked.toLocaleString()} />
+            <PerformanceSummaryItem label="Average Hours Packed" value={data.averageHoursPacked.toLocaleString()} />
         </div>
     );
 }

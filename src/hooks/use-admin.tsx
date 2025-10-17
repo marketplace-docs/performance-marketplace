@@ -27,7 +27,7 @@ type AdminContextType = {
   backlogData: BacklogData;
   dailySummary: DailySummaryData;
   hourlyBacklog: HourlyBacklogData;
-  performanceData: PerformanceData & { totalPacked: number };
+  performanceData: PerformanceData & { totalPacked: number, averageHoursPacked: number };
   isClient: boolean;
   isDialogOpen: boolean;
   setIsDialogOpen: (isOpen: boolean) => void;
@@ -53,15 +53,18 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
     setIsClient(true);
   }, []);
 
-  const totalPacked = useMemo(() => {
-    return hourlyBacklog.reduce((sum, item) => sum + item.value, 0);
+  const { totalPacked, averageHoursPacked } = useMemo(() => {
+    const total = hourlyBacklog.reduce((sum, item) => sum + item.value, 0);
+    const activeHours = hourlyBacklog.filter(item => item.value > 0).length;
+    const average = activeHours > 0 ? total / activeHours : 0;
+    return { totalPacked: total, averageHoursPacked: Math.round(average) };
   }, [hourlyBacklog]);
 
   useEffect(() => {
     if (isClient) {
       try {
         const newMetrics = { ...metrics, actual: totalPacked };
-        newMetrics.fulfillmentRate = newMetrics.forecast > 0 ? (totalPacked / newMetrics.forecast) * 100 : 0;
+        newMetrics.fulfillmentRate = newMetrics.forecast > 0 ? (dailySummary.day1.actual / newMetrics.forecast) * 100 : 0;
         
         const newDailySummary = {
           day1: { day: 1, actual: totalPacked, total: totalPacked },
@@ -88,13 +91,9 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
 
   const handleMetricsUpdate = (data: { forecast: number }) => {
     setMetrics((prevMetrics) => {
-        const newMetrics = { ...prevMetrics, forecast: data.forecast, actual: totalPacked };
-        newMetrics.fulfillmentRate = data.forecast > 0 ? (totalPacked / data.forecast) * 100 : 0;
+        const newMetrics = { ...prevMetrics, forecast: data.forecast };
+        newMetrics.fulfillmentRate = data.forecast > 0 ? (dailySummary.day1.actual / data.forecast) * 100 : 0;
         return newMetrics;
-    });
-    setDailySummary({
-        day1: { day: 1, actual: totalPacked, total: totalPacked },
-        day2: { day: 2, actual: 0, total: 0 },
     });
     setIsDialogOpen(false);
   };
@@ -139,7 +138,7 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
     backlogData,
     dailySummary,
     hourlyBacklog,
-    performanceData: { ...performanceData, totalPacked },
+    performanceData: { ...performanceData, totalPacked, averageHoursPacked },
     isClient,
     isDialogOpen,
     setIsDialogOpen,
