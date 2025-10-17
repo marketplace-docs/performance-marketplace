@@ -27,14 +27,14 @@ type AdminContextType = {
   backlogData: BacklogData;
   dailySummary: DailySummaryData;
   hourlyBacklog: HourlyBacklogData;
-  performanceData: PerformanceData;
+  performanceData: PerformanceData & { totalPacked: number };
   isClient: boolean;
   isDialogOpen: boolean;
   setIsDialogOpen: (isOpen: boolean) => void;
   handleMetricsUpdate: (data: Partial<Metrics>) => void;
   handleBacklogUpdate: (data: any) => void;
   handleHourlyBacklogUpdate: (data: { hourlyData: { hour: string; value: number }[] }) => void;
-  handlePerformanceUpdate: (data: Partial<PerformanceData>) => void;
+  handlePerformanceUpdate: (data: Partial<Omit<PerformanceData, 'totalPacked'>>) => void;
 };
 
 const AdminContext = createContext<AdminContextType | undefined>(undefined);
@@ -128,7 +128,7 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
     setIsDialogOpen(false);
   };
 
-  const handlePerformanceUpdate = (data: Partial<PerformanceData>) => {
+  const handlePerformanceUpdate = (data: Partial<Omit<PerformanceData, 'totalPacked'>>) => {
     setPerformanceData(prevData => ({
       ...prevData,
       ...data,
@@ -136,12 +136,16 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
     setIsDialogOpen(false);
   }
 
+  const totalPacked = useMemo(() => {
+    return hourlyBacklog.reduce((sum, item) => sum + item.value, 0);
+  }, [hourlyBacklog]);
+
   const value = {
     metrics,
     backlogData,
     dailySummary,
     hourlyBacklog,
-    performanceData: performanceData,
+    performanceData: { ...performanceData, totalPacked },
     isClient,
     isDialogOpen,
     setIsDialogOpen,
