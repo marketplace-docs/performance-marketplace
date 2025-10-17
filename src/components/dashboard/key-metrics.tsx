@@ -14,10 +14,18 @@ type KeyMetricsProps = {
 
 const MetricItem = ({ label, value, isPercentage = false }: { label: string; value: string | number, isPercentage?: boolean }) => {
   const displayValue = value ?? 0;
+  
+  const formatValue = (val: string | number) => {
+    if (typeof val === 'number') {
+      return isPercentage ? `${val.toFixed(2)}%` : val.toLocaleString();
+    }
+    return val;
+  }
+
   return (
     <>
       <div className="border-r border-b px-2 py-1 font-medium">{label}</div>
-      <div className="border-r border-b px-2 py-1 text-right">{typeof displayValue === 'number' && isPercentage ? `${displayValue.toFixed(2)}%` : displayValue.toLocaleString()}</div>
+      <div className="border-r border-b px-2 py-1 text-right">{formatValue(displayValue)}</div>
     </>
   );
 }
@@ -31,7 +39,7 @@ export default function KeyMetrics({ metrics }: KeyMetricsProps) {
       <MetricItem label="Actual OOS" value={metrics.actualOOS} />
       
       <MetricItem label="Fulfillment Rate" value={`${metrics.fulfillmentRate.toFixed(2)}%`} />
-      <MetricItem label="Progress" value={metrics.progress} />
+      <MetricItem label="Progress" value={metrics.progress.toLocaleString()} />
       <div className="border-r border-b px-2 py-1"></div>
       <div className="border-r border-b px-2 py-1"></div>
 
