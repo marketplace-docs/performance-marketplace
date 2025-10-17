@@ -21,7 +21,8 @@ export default function Header() {
         handlePerformanceUpdate,
         backlogData,
         hourlyBacklog,
-        performanceData
+        performanceData,
+        metrics,
     } = useAdmin();
 
   return (
@@ -48,6 +49,7 @@ export default function Header() {
               backlogData={backlogData}
               hourlyData={hourlyBacklog}
               performanceData={performanceData}
+              metrics={metrics}
             />
           </DialogContent>
         </Dialog>

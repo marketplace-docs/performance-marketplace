@@ -31,7 +31,7 @@ type AdminContextType = {
   isClient: boolean;
   isDialogOpen: boolean;
   setIsDialogOpen: (isOpen: boolean) => void;
-  handleMetricsUpdate: (data: Partial<Metrics>) => void;
+  handleMetricsUpdate: (data: { forecast: number }) => void;
   handleBacklogUpdate: (data: any) => void;
   handleHourlyBacklogUpdate: (data: { hourlyData: { hour: string; value: number }[] }) => void;
   handlePerformanceUpdate: (data: Partial<Omit<PerformanceData, 'totalPacked'>>) => void;
@@ -53,44 +53,48 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
     setIsClient(true);
   }, []);
 
+  const totalPacked = useMemo(() => {
+    return hourlyBacklog.reduce((sum, item) => sum + item.value, 0);
+  }, [hourlyBacklog]);
+
   useEffect(() => {
     if (isClient) {
       try {
-        window.localStorage.setItem('metrics', JSON.stringify(metrics));
+        const newMetrics = { ...metrics, actual: totalPacked };
+        newMetrics.fulfillmentRate = newMetrics.forecast > 0 ? (totalPacked / newMetrics.forecast) * 100 : 0;
+        
+        const newDailySummary = {
+          day1: { day: 1, actual: totalPacked, total: totalPacked },
+          day2: { day: 2, actual: dailySummary.day1.actual, total: dailySummary.day1.total },
+        };
+
+        if (JSON.stringify(newMetrics) !== JSON.stringify(metrics)) {
+            setMetrics(newMetrics);
+        }
+        if (JSON.stringify(newDailySummary) !== JSON.stringify(dailySummary)) {
+            setDailySummary(newDailySummary);
+        }
+
+        window.localStorage.setItem('metrics', JSON.stringify(newMetrics));
         window.localStorage.setItem('backlogData', JSON.stringify(backlogData));
-        window.localStorage.setItem('dailySummary', JSON.stringify(dailySummary));
+        window.localStorage.setItem('dailySummary', JSON.stringify(newDailySummary));
         window.localStorage.setItem('hourlyBacklog', JSON.stringify(hourlyBacklog));
         window.localStorage.setItem('performanceData', JSON.stringify(performanceData));
       } catch (error) {
         console.warn('Error writing to localStorage:', error);
       }
     }
-  }, [isClient, metrics, backlogData, dailySummary, hourlyBacklog, performanceData]);
+  }, [isClient, totalPacked, metrics, backlogData, dailySummary, hourlyBacklog, performanceData]);
 
-  const handleMetricsUpdate = (data: Partial<Metrics>) => {
+  const handleMetricsUpdate = (data: { forecast: number }) => {
     setMetrics((prevMetrics) => {
-        const newMetrics = { ...prevMetrics, ...data };
-        const forecast = newMetrics.forecast || 0;
-        const day1Total = dailySummary.day1.total || 0;
-  
-        newMetrics.fulfillmentRate = forecast > 0 ? (day1Total / forecast) * 100 : 0;
-  
+        const newMetrics = { ...prevMetrics, forecast: data.forecast, actual: totalPacked };
+        newMetrics.fulfillmentRate = data.forecast > 0 ? (totalPacked / data.forecast) * 100 : 0;
         return newMetrics;
-      });
-
-    setDailySummary((prevSummary) => {
-       const newDay2 = { ...prevSummary.day1, day: 2 };
-
-      const newDay1 = {
-        day: 1,
-        actual: data.actual !== undefined ? data.actual : prevSummary.day1.actual,
-        total: data.actual !== undefined ? data.actual : prevSummary.day1.actual,
-      };
-
-      return {
-        day1: newDay1,
-        day2: newDay2,
-      };
+    });
+    setDailySummary({
+        day1: { day: 1, actual: totalPacked, total: totalPacked },
+        day2: { day: 2, actual: dailySummary.day1.actual, total: dailySummary.day1.total },
     });
     setIsDialogOpen(false);
   };
@@ -129,10 +133,6 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
     }));
     setIsDialogOpen(false);
   }
-
-  const totalPacked = useMemo(() => {
-    return hourlyBacklog.reduce((sum, item) => sum + item.value, 0);
-  }, [hourlyBacklog]);
 
   const value = {
     metrics,

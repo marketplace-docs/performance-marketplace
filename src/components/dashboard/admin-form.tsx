@@ -18,7 +18,6 @@ import { ScrollArea } from '../ui/scroll-area';
 
 const metricsSchema = z.object({
   forecast: z.coerce.number().min(0),
-  actual: z.coerce.number().min(0),
 });
 
 type MetricsFormValues = z.infer<typeof metricsSchema>;
@@ -61,14 +60,14 @@ type AdminFormProps = {
   backlogData: { types: { statuses: any }[] };
   hourlyData: { hour: string; value: number }[];
   performanceData: { picker: number; packer: number; };
+  metrics: { forecast: number };
 };
 
-const MetricsForm = ({ onMetricsSubmit }: { onMetricsSubmit: (data: MetricsFormValues) => void }) => {
+const MetricsForm = ({ onMetricsSubmit, metrics }: { onMetricsSubmit: (data: MetricsFormValues) => void; metrics: { forecast: number } }) => {
   const form = useForm<MetricsFormValues>({
     resolver: zodResolver(metricsSchema),
     defaultValues: {
-      forecast: 0,
-      actual: 0,
+      forecast: metrics.forecast || 0,
     },
   });
 
@@ -81,19 +80,6 @@ const MetricsForm = ({ onMetricsSubmit }: { onMetricsSubmit: (data: MetricsFormV
           render={({ field }) => (
             <FormItem>
               <FormLabel>Forecast</FormLabel>
-              <FormControl>
-                <Input type="number" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="actual"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Actual Order</FormLabel>
               <FormControl>
                 <Input type="number" {...field} />
               </FormControl>
@@ -255,7 +241,7 @@ const PerformanceForm = ({ onPerformanceSubmit, performanceData }: { onPerforman
 };
 
 
-export default function AdminForm({ onMetricsSubmit, onBacklogSubmit, onHourlyBacklogSubmit, onPerformanceSubmit, backlogData, hourlyData, performanceData }: AdminFormProps) {
+export default function AdminForm({ onMetricsSubmit, onBacklogSubmit, onHourlyBacklogSubmit, onPerformanceSubmit, backlogData, hourlyData, performanceData, metrics }: AdminFormProps) {
   return (
     <Tabs defaultValue="metrics" className="w-full">
       <TabsList className="grid w-full grid-cols-4">
@@ -265,7 +251,7 @@ export default function AdminForm({ onMetricsSubmit, onBacklogSubmit, onHourlyBa
         <TabsTrigger value="performance">Kinerja</TabsTrigger>
       </TabsList>
       <TabsContent value="metrics">
-        <MetricsForm onMetricsSubmit={onMetricsSubmit} />
+        <MetricsForm onMetricsSubmit={onMetricsSubmit} metrics={metrics} />
       </TabsContent>
       <TabsContent value="backlog">
         <BacklogForm onBacklogSubmit={onBacklogSubmit} backlogData={backlogData} />
