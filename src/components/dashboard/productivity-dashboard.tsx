@@ -56,6 +56,7 @@ export default function ProductivityDashboard({ data }: ProductivityDashboardPro
     setCurrentPage,
     rowsPerPage,
     setRowsPerPage,
+    handleFileUpload,
   } = useAdmin();
 
   const handleEditClick = (item: PerformanceData) => {
@@ -106,7 +107,13 @@ export default function ProductivityDashboard({ data }: ProductivityDashboardPro
                 <Upload className="mr-2" />
                 Upload CSV
             </Button>
-            <input type="file" ref={fileInputRef} className="hidden" accept=".csv" />
+            <input 
+              type="file" 
+              ref={fileInputRef} 
+              className="hidden" 
+              accept=".csv" 
+              onChange={handleFileUpload}
+            />
             <Button onClick={handleExport}>
                 <Download className="mr-2" />
                 Export CSV

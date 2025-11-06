@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useState, useEffect, ReactNode, useMemo } from 'react';
 import { initialMetrics, initialBacklogData, initialDailySummary, initialHourlyBacklog, initialPerformanceData, initialProductivityData } from '@/lib/data';
+import Papa from 'papaparse';
 
 type Metrics = typeof initialMetrics;
 type BacklogData = typeof initialBacklogData;
@@ -45,6 +46,7 @@ type AdminContextType = {
   handleHourlyBacklogUpdate: (data: { hourlyData: { hour: string; value: number }[] }) => void;
   handlePerformanceUpdate: (data: Partial<Omit<PerformanceData, 'totalPacked' | 'averageHoursPacked'>>) => void;
   handleProductivityUpdate: (data: PerformanceItem) => void;
+  handleFileUpload: (event: React.ChangeEvent<HTMLInputElement>) => void;
   currentPage: number;
   setCurrentPage: (page: number) => void;
   rowsPerPage: number;
@@ -168,8 +170,45 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
     });
     setIsProductivityFormOpen(false);
     setEditingPerformance(null);
-};
+  };
 
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      Papa.parse(file, {
+        header: true,
+        skipEmptyLines: true,
+        complete: (results) => {
+          const uploadedData = results.data as any[];
+          setProductivityData(prevData => {
+            const newPerformance = prevData.performance.map(item => {
+              const found = uploadedData.find(row => parseInt(row.id) === item.id);
+              if (found) {
+                const totalOrder = parseInt(found.totalOrder) || item.totalOrder;
+                const totalQty = parseInt(found.totalQty) || item.totalQty;
+                const targetOrder = parseInt(found.targetOrder) || item.targetOrder;
+                
+                const updatedItem = {
+                  ...item,
+                  name: found.name || item.name,
+                  job: found.job || item.job,
+                  totalOrder,
+                  totalQty,
+                };
+                updatedItem.status = totalOrder >= targetOrder ? 'BERHASIL' : 'GAGAL';
+                return updatedItem;
+              }
+              return item;
+            });
+            return { ...prevData, performance: newPerformance };
+          });
+        },
+        error: (error: any) => {
+          console.error("Error parsing CSV:", error);
+        }
+      });
+    }
+  };
 
   const value = {
     metrics,
@@ -192,6 +231,7 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
     handleHourlyBacklogUpdate,
     handlePerformanceUpdate,
     handleProductivityUpdate,
+    handleFileUpload,
     currentPage,
     setCurrentPage,
     rowsPerPage,
