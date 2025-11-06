@@ -47,6 +47,7 @@ type AdminContextType = {
   handlePerformanceUpdate: (data: Partial<Omit<PerformanceData, 'totalPacked' | 'averageHoursPacked'>>) => void;
   handleProductivityUpdate: (data: PerformanceItem) => void;
   handleFileUpload: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  handleProductivityReset: () => void;
   currentPage: number;
   setCurrentPage: (page: number) => void;
   rowsPerPage: number;
@@ -211,6 +212,11 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
       });
     }
   };
+  
+  const handleProductivityReset = () => {
+    setProductivityData(initialProductivityData);
+    setCurrentPage(1);
+  };
 
   const value = {
     metrics,
@@ -234,6 +240,7 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
     handlePerformanceUpdate,
     handleProductivityUpdate,
     handleFileUpload,
+    handleProductivityReset,
     currentPage,
     setCurrentPage,
     rowsPerPage,

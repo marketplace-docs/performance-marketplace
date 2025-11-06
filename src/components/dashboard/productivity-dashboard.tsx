@@ -15,7 +15,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { ThumbsUp, ThumbsDown, Pencil, Upload, Download, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ThumbsUp, ThumbsDown, Pencil, Upload, Download, ChevronLeft, ChevronRight, RefreshCcw } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '../ui/button';
 import { useAdmin } from '@/hooks/use-admin';
@@ -27,6 +27,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
+
 
 type PerformanceData = {
   id: number;
@@ -55,6 +67,7 @@ export default function ProductivityDashboard({ data }: ProductivityDashboardPro
     rowsPerPage,
     setRowsPerPage,
     handleFileUpload,
+    handleProductivityReset,
   } = useAdmin();
 
   const handleEditClick = (item: PerformanceData) => {
@@ -114,6 +127,27 @@ export default function ProductivityDashboard({ data }: ProductivityDashboardPro
                 <Download className="mr-2" />
                 Export CSV
             </Button>
+             <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="outline">
+                  <RefreshCcw className="mr-2" />
+                  Reset Data
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This action will reset all performance data to its initial state.
+                    You will need to upload a new CSV file to repopulate the data.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleProductivityReset}>Continue</AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
         </div>
         <CardTitle className="text-xl font-bold text-center p-2 bg-destructive text-destructive-foreground rounded-lg">
           MARKETPLACE PERFORMANCE, {data.date}
