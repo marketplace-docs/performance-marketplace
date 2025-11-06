@@ -8,11 +8,19 @@ import {
   CardDescription,
 } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ThumbsUp, ThumbsDown, Pencil, Upload, Download } from 'lucide-react';
+import { ThumbsUp, ThumbsDown, Pencil, Upload, Download, ChevronLeft, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '../ui/button';
 import { useAdmin } from '@/hooks/use-admin';
 import React from 'react';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+
 
 type PerformanceData = {
   id: number;
@@ -41,7 +49,14 @@ const PerformanceItem = ({ label, value }: { label: string; value: string | numb
 
 
 export default function ProductivityDashboard({ data }: ProductivityDashboardProps) {
-  const { setEditingPerformance, setIsProductivityFormOpen } = useAdmin();
+  const { 
+    setEditingPerformance, 
+    setIsProductivityFormOpen,
+    currentPage,
+    setCurrentPage,
+    rowsPerPage,
+    setRowsPerPage,
+  } = useAdmin();
 
   const handleEditClick = (item: PerformanceData) => {
     setEditingPerformance(item);
@@ -75,6 +90,12 @@ export default function ProductivityDashboard({ data }: ProductivityDashboardPro
   
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
+  // Pagination logic
+  const totalPages = Math.ceil(data.performance.length / rowsPerPage);
+  const startIndex = (currentPage - 1) * rowsPerPage;
+  const endIndex = startIndex + rowsPerPage;
+  const currentItems = data.performance.slice(startIndex, endIndex);
+
   return (
     <div className="w-full">
         <h2 className="text-xl font-bold mb-4 text-center p-2 bg-destructive text-destructive-foreground rounded-lg">
@@ -92,7 +113,7 @@ export default function ProductivityDashboard({ data }: ProductivityDashboardPro
             </Button>
         </div>
         <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-2">
-            {data.performance.map((item) => (
+            {currentItems.map((item) => (
                 <Card key={item.id}>
                     <CardHeader className="p-4">
                         <div className="flex justify-between items-start">
@@ -129,6 +150,50 @@ export default function ProductivityDashboard({ data }: ProductivityDashboardPro
                     </CardContent>
                 </Card>
             ))}
+        </div>
+        <div className="flex items-center justify-between mt-4">
+            <div className="flex items-center gap-2">
+                <span className="text-sm text-muted-foreground">Rows per page:</span>
+                <Select
+                    value={rowsPerPage.toString()}
+                    onValueChange={(value) => {
+                        setRowsPerPage(Number(value));
+                        setCurrentPage(1);
+                    }}
+                >
+                    <SelectTrigger className="w-20">
+                        <SelectValue placeholder={rowsPerPage} />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="10">10</SelectItem>
+                        <SelectItem value="30">30</SelectItem>
+                        <SelectItem value="50">50</SelectItem>
+                    </SelectContent>
+                </Select>
+            </div>
+            <div className="flex items-center gap-4">
+                <span className="text-sm text-muted-foreground">
+                    Page {currentPage} of {totalPages}
+                </span>
+                <div className="flex items-center gap-2">
+                    <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={() => setCurrentPage(currentPage - 1)}
+                        disabled={currentPage === 1}
+                    >
+                        <ChevronLeft className="h-4 w-4" />
+                    </Button>
+                    <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={() => setCurrentPage(currentPage + 1)}
+                        disabled={currentPage === totalPages}
+                    >
+                        <ChevronRight className="h-4 w-4" />
+                    </Button>
+                </div>
+            </div>
         </div>
     </div>
   );

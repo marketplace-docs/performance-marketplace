@@ -45,6 +45,10 @@ type AdminContextType = {
   handleHourlyBacklogUpdate: (data: { hourlyData: { hour: string; value: number }[] }) => void;
   handlePerformanceUpdate: (data: Partial<Omit<PerformanceData, 'totalPacked' | 'averageHoursPacked'>>) => void;
   handleProductivityUpdate: (data: PerformanceItem) => void;
+  currentPage: number;
+  setCurrentPage: (page: number) => void;
+  rowsPerPage: number;
+  setRowsPerPage: (rows: number) => void;
 };
 
 const AdminContext = createContext<AdminContextType | undefined>(undefined);
@@ -62,6 +66,9 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
   const [isProductivityDialogOpen, setIsProductivityDialogOpen] = useState(false);
   const [isProductivityFormOpen, setIsProductivityFormOpen] = useState(false);
   const [editingPerformance, setEditingPerformance] = useState<PerformanceItem | null>(null);
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
 
   useEffect(() => {
     setIsClient(true);
@@ -185,6 +192,10 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
     handleHourlyBacklogUpdate,
     handlePerformanceUpdate,
     handleProductivityUpdate,
+    currentPage,
+    setCurrentPage,
+    rowsPerPage,
+    setRowsPerPage,
   }
 
   return <AdminContext.Provider value={value}>{children}</AdminContext.Provider>;
