@@ -58,11 +58,11 @@ export const initialPerformanceData = {
 export const initialProductivityData = {
   date: "6 NOVEMBER 2025",
   performance: [
-    { id: 1, name: "", job: "Picker", totalOrder: 0, totalQty: 0, targetOrder: 420, targetQuantity: 1085, status: "GAGAL" },
-    { id: 2, name: "", job: "Picker", totalOrder: 0, totalQty: 0, targetOrder: 420, targetQuantity: 1085, status: "GAGAL" },
-    { id: 3, name: "", job: "Picker", totalOrder: 0, totalQty: 0, targetOrder: 420, targetQuantity: 1085, status: "GAGAL" },
-    { id: 4, name: "", job: "Picker", totalOrder: 0, totalQty: 0, targetOrder: 420, targetQuantity: 1085, status: "GAGAL" },
-    { id: 5, name: "", job: "Picker", totalOrder: 0, totalQty: 0, targetOrder: 420, targetQuantity: 1085, status: "GAGAL" },
+    { id: 1, name: "Edi Saputro", job: "Picker", totalOrder: 245, totalQty: 324, targetOrder: 420, targetQuantity: 1085, status: "GAGAL" },
+    { id: 2, name: "Putri Aninda Febriani", job: "Picker", totalOrder: 225, totalQty: 264, targetOrder: 420, targetQuantity: 1085, status: "GAGAL" },
+    { id: 3, name: "Panji Ridwan", job: "Picker", totalOrder: 174, totalQty: 213, targetOrder: 420, targetQuantity: 1085, status: "GAGAL" },
+    { id: 4, name: "Luthfi Aditya", job: "Picker", totalOrder: 159, totalQty: 235, targetOrder: 420, targetQuantity: 1085, status: "GAGAL" },
+    { id: 5, name: "Omar", job: "Picker", totalOrder: 0, totalQty: 0, targetOrder: 420, targetQuantity: 1085, status: "GAGAL" },
     { id: 6, name: "", job: "Picker", totalOrder: 0, totalQty: 0, targetOrder: 420, targetQuantity: 1085, status: "GAGAL" },
     { id: 7, name: "", job: "Picker", totalOrder: 0, totalQty: 0, targetOrder: 420, targetQuantity: 1085, status: "GAGAL" },
     { id: 8, name: "", job: "Picker", totalOrder: 0, totalQty: 0, targetOrder: 420, targetQuantity: 1085, status: "GAGAL" },
