@@ -5,7 +5,6 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
-  CardDescription,
 } from '@/components/ui/card';
 import {
   Table,
@@ -28,6 +27,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { ScrollArea } from '../ui/scroll-area';
 
 
 type PerformanceData = {
@@ -122,49 +122,51 @@ export default function ProductivityDashboard({ data }: ProductivityDashboardPro
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="overflow-x-auto">
-          <Table className="min-w-full">
-            <TableHeader>
-              <TableRow>
-                <TableHead>NO</TableHead>
-                <TableHead>NAME</TableHead>
-                <TableHead>JOB</TableHead>
-                <TableHead>TOTAL ORDER</TableHead>
-                <TableHead>TOTAL QTY</TableHead>
-                <TableHead className='text-destructive'>TARGET ORDER</TableHead>
-                <TableHead className='text-destructive'>TARGET QTY</TableHead>
-                <TableHead>STATUS</TableHead>
-                <TableHead>ACTION</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {currentItems.map((item) => (
-                <TableRow key={item.id}>
-                  <TableCell>{item.id}</TableCell>
-                  <TableCell>{item.name || '-'}</TableCell>
-                  <TableCell>{item.job}</TableCell>
-                  <TableCell>{item.totalOrder.toLocaleString()}</TableCell>
-                  <TableCell>{item.totalQty.toLocaleString()}</TableCell>
-                  <TableCell className='text-destructive font-semibold'>{item.targetOrder.toLocaleString()}</TableCell>
-                  <TableCell className='text-destructive font-semibold'>{item.targetQuantity.toLocaleString()}</TableCell>
-                  <TableCell>
-                    <Badge className={cn("text-center font-bold", item.status === "GAGAL" ? "bg-yellow-400 text-black" : "bg-green-500")}>
-                      <div className="flex items-center justify-center gap-1">
-                          <span>{item.status}</span>
-                          {item.status === "GAGAL" ? <ThumbsDown className="h-4 w-4" /> : <ThumbsUp className="h-4 w-4" />}
-                      </div>
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <Button variant="outline" size="icon" onClick={() => handleEditClick(item)}>
-                        <Pencil className='h-4 w-4'/>
-                    </Button>
-                  </TableCell>
+        <ScrollArea className="h-96">
+          <div className="overflow-x-auto pr-4">
+            <Table className="min-w-full">
+              <TableHeader>
+                <TableRow>
+                  <TableHead>NO</TableHead>
+                  <TableHead>NAME</TableHead>
+                  <TableHead>JOB</TableHead>
+                  <TableHead>TOTAL ORDER</TableHead>
+                  <TableHead>TOTAL QTY</TableHead>
+                  <TableHead className='text-destructive'>TARGET ORDER</TableHead>
+                  <TableHead className='text-destructive'>TARGET QTY</TableHead>
+                  <TableHead>STATUS</TableHead>
+                  <TableHead>ACTION</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
+              </TableHeader>
+              <TableBody>
+                {currentItems.map((item) => (
+                  <TableRow key={item.id}>
+                    <TableCell>{item.id}</TableCell>
+                    <TableCell>{item.name || '-'}</TableCell>
+                    <TableCell>{item.job}</TableCell>
+                    <TableCell>{item.totalOrder.toLocaleString()}</TableCell>
+                    <TableCell>{item.totalQty.toLocaleString()}</TableCell>
+                    <TableCell className='text-destructive font-semibold'>{item.targetOrder.toLocaleString()}</TableCell>
+                    <TableCell className='text-destructive font-semibold'>{item.targetQuantity.toLocaleString()}</TableCell>
+                    <TableCell>
+                      <Badge className={cn("text-center font-bold", item.status === "GAGAL" ? "bg-yellow-400 text-black" : "bg-green-500")}>
+                        <div className="flex items-center justify-center gap-1">
+                            <span>{item.status}</span>
+                            {item.status === "GAGAL" ? <ThumbsDown className="h-4 w-4" /> : <ThumbsUp className="h-4 w-4" />}
+                        </div>
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <Button variant="outline" size="icon" onClick={() => handleEditClick(item)}>
+                          <Pencil className='h-4 w-4'/>
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        </ScrollArea>
         <div className="flex items-center justify-between mt-4">
             <div className="flex items-center gap-2">
                 <span className="text-sm text-muted-foreground">Rows per page:</span>
