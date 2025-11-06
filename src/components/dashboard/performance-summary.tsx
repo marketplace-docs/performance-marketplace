@@ -20,7 +20,7 @@ const PerformanceSummaryItem = ({ label, value }: { label: string; value: string
 
 export default function PerformanceSummary({ data }: PerformanceSummaryProps) {
     return (
-        <div className="my-6 flex gap-4 justify-between">
+        <div className="my-6 grid grid-cols-2 lg:grid-cols-4 gap-4">
             <PerformanceSummaryItem label="Picker" value={data.picker.toLocaleString()} />
             <PerformanceSummaryItem label="Packer" value={data.packer.toLocaleString()} />
             <PerformanceSummaryItem label="Total Packed" value={data.totalPacked.toLocaleString()} />

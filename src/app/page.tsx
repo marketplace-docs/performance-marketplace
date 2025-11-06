@@ -5,6 +5,7 @@ import KeyMetrics from '@/components/dashboard/key-metrics';
 import DailySummary from '@/components/dashboard/daily-summary';
 import Backlog from '@/components/dashboard/backlog';
 import { useAdmin } from '@/hooks/use-admin';
+import ProductivityMenu from '@/components/dashboard/productivity-menu';
 
 type Metrics = {
   forecast: number;
@@ -30,6 +31,7 @@ export default function Home() {
         </div>
       </div>
       <Backlog data={backlogData} hourlyData={hourlyBacklog} performanceData={performanceData} />
+      <ProductivityMenu />
     </main>
   );
 }

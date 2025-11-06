@@ -1,13 +1,14 @@
 'use client';
 
 import { createContext, useContext, useState, useEffect, ReactNode, useMemo } from 'react';
-import { initialMetrics, initialBacklogData, initialDailySummary, initialHourlyBacklog, initialPerformanceData } from '@/lib/data';
+import { initialMetrics, initialBacklogData, initialDailySummary, initialHourlyBacklog, initialPerformanceData, initialProductivityData } from '@/lib/data';
 
 type Metrics = typeof initialMetrics;
 type BacklogData = typeof initialBacklogData;
 type DailySummaryData = typeof initialDailySummary;
 type HourlyBacklogData = typeof initialHourlyBacklog;
 type PerformanceData = Omit<typeof initialPerformanceData, 'averageHours'>;
+type ProductivityData = typeof initialProductivityData;
 
 const getFromLocalStorage = (key: string, initialValue: any) => {
   if (typeof window === 'undefined') {
@@ -28,13 +29,16 @@ type AdminContextType = {
   dailySummary: DailySummaryData;
   hourlyBacklog: HourlyBacklogData;
   performanceData: PerformanceData & { totalPacked: number, averageHoursPacked: number };
+  productivityData: ProductivityData;
   isClient: boolean;
   isDialogOpen: boolean;
   setIsDialogOpen: (isOpen: boolean) => void;
+  isProductivityDialogOpen: boolean;
+  setIsProductivityDialogOpen: (isOpen: boolean) => void;
   handleMetricsUpdate: (data: { forecast: number }) => void;
   handleBacklogUpdate: (data: any) => void;
   handleHourlyBacklogUpdate: (data: { hourlyData: { hour: string; value: number }[] }) => void;
-  handlePerformanceUpdate: (data: Partial<Omit<PerformanceData, 'totalPacked'>>) => void;
+  handlePerformanceUpdate: (data: Partial<Omit<PerformanceData, 'totalPacked' | 'averageHoursPacked'>>) => void;
 };
 
 const AdminContext = createContext<AdminContextType | undefined>(undefined);
@@ -45,9 +49,11 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
   const [dailySummary, setDailySummary] = useState<DailySummaryData>(() => getFromLocalStorage('dailySummary', initialDailySummary));
   const [hourlyBacklog, setHourlyBacklog] = useState<HourlyBacklogData>(() => getFromLocalStorage('hourlyBacklog', initialHourlyBacklog));
   const [performanceData, setPerformanceData] = useState<PerformanceData>(() => getFromLocalStorage('performanceData', initialPerformanceData));
+  const [productivityData, setProductivityData] = useState<ProductivityData>(() => getFromLocalStorage('productivityData', initialProductivityData));
 
   const [isClient, setIsClient] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isProductivityDialogOpen, setIsProductivityDialogOpen] = useState(false);
 
   useEffect(() => {
     setIsClient(true);
@@ -63,8 +69,7 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     if (isClient) {
       try {
-        const newMetrics = { ...metrics, actual: totalPacked };
-        newMetrics.fulfillmentRate = newMetrics.forecast > 0 ? (dailySummary.day1.actual / newMetrics.forecast) * 100 : 0;
+        const newMetrics = { ...metrics, actual: totalPacked, fulfillmentRate: metrics.forecast > 0 ? (dailySummary.day1.actual / metrics.forecast) * 100 : 0 };
         
         const newDailySummary = {
           day1: { day: 1, actual: totalPacked, total: totalPacked },
@@ -83,11 +88,12 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
         window.localStorage.setItem('dailySummary', JSON.stringify(newDailySummary));
         window.localStorage.setItem('hourlyBacklog', JSON.stringify(hourlyBacklog));
         window.localStorage.setItem('performanceData', JSON.stringify(performanceData));
+        window.localStorage.setItem('productivityData', JSON.stringify(productivityData));
       } catch (error) {
         console.warn('Error writing to localStorage:', error);
       }
     }
-  }, [isClient, totalPacked, metrics, backlogData, dailySummary, hourlyBacklog, performanceData]);
+  }, [isClient, totalPacked, metrics, backlogData, dailySummary, hourlyBacklog, performanceData, productivityData]);
 
   const handleMetricsUpdate = (data: { forecast: number }) => {
     setMetrics((prevMetrics) => {
@@ -125,7 +131,7 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
     setIsDialogOpen(false);
   };
 
-  const handlePerformanceUpdate = (data: Partial<Omit<PerformanceData, 'totalPacked'>>) => {
+  const handlePerformanceUpdate = (data: Partial<Omit<PerformanceData, 'totalPacked' | 'averageHoursPacked'>>) => {
     setPerformanceData(prevData => ({
       ...prevData,
       ...data,
@@ -139,9 +145,12 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
     dailySummary,
     hourlyBacklog,
     performanceData: { ...performanceData, totalPacked, averageHoursPacked },
+    productivityData,
     isClient,
     isDialogOpen,
     setIsDialogOpen,
+    isProductivityDialogOpen,
+    setIsProductivityDialogOpen,
     handleMetricsUpdate,
     handleBacklogUpdate,
     handleHourlyBacklogUpdate,

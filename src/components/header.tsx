@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Settings } from 'lucide-react';
 import AdminForm from "./dashboard/admin-form";
 import { useAdmin } from "@/hooks/use-admin";
+import ProductivityDashboard from "./dashboard/productivity-dashboard";
 
 export default function Header() {
     const { 
@@ -23,6 +24,9 @@ export default function Header() {
         hourlyBacklog,
         performanceData,
         metrics,
+        isProductivityDialogOpen,
+        setIsProductivityDialogOpen,
+        productivityData
     } = useAdmin();
 
   return (
@@ -52,6 +56,14 @@ export default function Header() {
               metrics={metrics}
             />
           </DialogContent>
+        </Dialog>
+        <Dialog open={isProductivityDialogOpen} onOpenChange={setIsProductivityDialogOpen}>
+            <DialogContent className="max-w-4xl">
+                <DialogHeader>
+                    <DialogTitle>Marketplace Performance</DialogTitle>
+                </DialogHeader>
+                <ProductivityDashboard data={productivityData} />
+            </DialogContent>
         </Dialog>
     </header>
   );
