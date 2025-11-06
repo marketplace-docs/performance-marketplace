@@ -1,11 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import KeyMetrics from '@/components/dashboard/key-metrics';
 import DailySummary from '@/components/dashboard/daily-summary';
 import Backlog from '@/components/dashboard/backlog';
 import { useAdmin } from '@/hooks/use-admin';
 import ProductivityMenu from '@/components/dashboard/productivity-menu';
+import ProductivityDashboard from '@/components/dashboard/productivity-dashboard';
 
 type Metrics = {
   forecast: number;
@@ -14,7 +15,7 @@ type Metrics = {
 };
 
 export default function Home() {
-  const { metrics, backlogData, dailySummary, hourlyBacklog, performanceData, isClient } = useAdmin();
+  const { metrics, backlogData, dailySummary, hourlyBacklog, performanceData, isClient, productivityData } = useAdmin();
 
   if (!isClient) {
     return null;
@@ -31,7 +32,9 @@ export default function Home() {
         </div>
       </div>
       <Backlog data={backlogData} hourlyData={hourlyBacklog} performanceData={performanceData} />
-      <ProductivityMenu />
+      <ProductivityMenu>
+        <ProductivityDashboard data={productivityData} />
+      </ProductivityMenu>
     </main>
   );
 }

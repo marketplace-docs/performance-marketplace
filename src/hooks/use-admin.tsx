@@ -35,8 +35,6 @@ type AdminContextType = {
   isClient: boolean;
   isDialogOpen: boolean;
   setIsDialogOpen: (isOpen: boolean) => void;
-  isProductivityDialogOpen: boolean;
-  setIsProductivityDialogOpen: (isOpen: boolean) => void;
   isProductivityFormOpen: boolean;
   setIsProductivityFormOpen: (isOpen: boolean) => void;
   editingPerformance: PerformanceItem | null;
@@ -67,7 +65,6 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
 
   const [isClient, setIsClient] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [isProductivityDialogOpen, setIsProductivityDialogOpen] = useState(false);
   const [isProductivityFormOpen, setIsProductivityFormOpen] = useState(false);
   const [editingPerformance, setEditingPerformance] = useState<PerformanceItem | null>(null);
 
@@ -248,8 +245,6 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
     isClient,
     isDialogOpen,
     setIsDialogOpen,
-    isProductivityDialogOpen,
-    setIsProductivityDialogOpen,
     isProductivityFormOpen,
     setIsProductivityFormOpen,
     editingPerformance,
