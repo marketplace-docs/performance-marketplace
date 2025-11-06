@@ -70,7 +70,7 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
   const [editingPerformance, setEditingPerformance] = useState<PerformanceItem | null>(null);
 
   const [currentPage, setCurrentPage] = useState(1);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [rowsPerPage, setRowsPerPage] = useState<number>(() => getFromLocalStorage('rowsPerPage', 10));
 
   useEffect(() => {
     setIsClient(true);
@@ -106,11 +106,13 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
         window.localStorage.setItem('hourlyBacklog', JSON.stringify(hourlyBacklog));
         window.localStorage.setItem('performanceData', JSON.stringify(performanceData));
         window.localStorage.setItem('productivityData', JSON.stringify(productivityData));
+        window.localStorage.setItem('rowsPerPage', JSON.stringify(rowsPerPage));
+
       } catch (error) {
         console.warn('Error writing to localStorage:', error);
       }
     }
-  }, [isClient, totalPacked, metrics, backlogData, dailySummary, hourlyBacklog, performanceData, productivityData]);
+  }, [isClient, totalPacked, metrics, backlogData, dailySummary, hourlyBacklog, performanceData, productivityData, rowsPerPage]);
 
   const handleMetricsUpdate = (data: { forecast: number }) => {
     setMetrics((prevMetrics) => {
