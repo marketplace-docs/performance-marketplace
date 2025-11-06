@@ -48,6 +48,7 @@ type AdminContextType = {
   handleProductivityUpdate: (data: PerformanceItem) => void;
   handleFileUpload: (event: React.ChangeEvent<HTMLInputElement>) => void;
   handleProductivityReset: () => void;
+  handleProductivityDelete: (id: number) => void;
   currentPage: number;
   setCurrentPage: (page: number) => void;
   rowsPerPage: number;
@@ -218,6 +219,25 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
     setCurrentPage(1);
   };
 
+  const handleProductivityDelete = (id: number) => {
+    setProductivityData(prevData => {
+      const newPerformance = prevData.performance.map(item => {
+        if (item.id === id) {
+          const initialItem = initialProductivityData.performance.find(p => p.id === id) || item;
+          return {
+            ...item,
+            name: '',
+            totalOrder: 0,
+            totalQty: 0,
+            status: 'GAGAL',
+          };
+        }
+        return item;
+      });
+      return { ...prevData, performance: newPerformance };
+    });
+  };
+
   const value = {
     metrics,
     backlogData,
@@ -241,6 +261,7 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
     handleProductivityUpdate,
     handleFileUpload,
     handleProductivityReset,
+    handleProductivityDelete,
     currentPage,
     setCurrentPage,
     rowsPerPage,

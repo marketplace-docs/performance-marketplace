@@ -15,7 +15,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { ThumbsUp, ThumbsDown, Pencil, Upload, Download, ChevronLeft, ChevronRight, RefreshCcw } from 'lucide-react';
+import { ThumbsUp, ThumbsDown, Pencil, Upload, Download, ChevronLeft, ChevronRight, RefreshCcw, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '../ui/button';
 import { useAdmin } from '@/hooks/use-admin';
@@ -68,6 +68,7 @@ export default function ProductivityDashboard({ data }: ProductivityDashboardPro
     setRowsPerPage,
     handleFileUpload,
     handleProductivityReset,
+    handleProductivityDelete,
   } = useAdmin();
 
   const handleEditClick = (item: PerformanceData) => {
@@ -187,10 +188,29 @@ export default function ProductivityDashboard({ data }: ProductivityDashboardPro
                         </div>
                       </Badge>
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="flex gap-2">
                       <Button variant="outline" size="icon" onClick={() => handleEditClick(item)}>
                         <Pencil className='h-4 w-4' />
                       </Button>
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button variant="destructive" size="icon">
+                            <Trash2 className='h-4 w-4' />
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Are you sure you want to delete this entry?</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              This will reset the data for {item.name || `entry ${item.id}`}. You can re-enter the data manually or via CSV upload.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction onClick={() => handleProductivityDelete(item.id)}>Delete</AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
                     </TableCell>
                   </TableRow>
                 ))}
