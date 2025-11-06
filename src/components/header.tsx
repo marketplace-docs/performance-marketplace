@@ -61,7 +61,7 @@ export default function Header() {
           </DialogContent>
         </Dialog>
         <Dialog open={isProductivityDialogOpen} onOpenChange={setIsProductivityDialogOpen}>
-            <DialogContent className="max-w-4xl">
+            <DialogContent className="max-w-6xl">
                 <DialogHeader>
                     <DialogTitle>Marketplace Performance</DialogTitle>
                 </DialogHeader>
