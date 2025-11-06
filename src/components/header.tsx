@@ -11,6 +11,7 @@ import { Settings } from 'lucide-react';
 import AdminForm from "./dashboard/admin-form";
 import { useAdmin } from "@/hooks/use-admin";
 import ProductivityDashboard from "./dashboard/productivity-dashboard";
+import ProductivityForm from "./dashboard/productivity-form";
 
 export default function Header() {
     const { 
@@ -26,7 +27,9 @@ export default function Header() {
         metrics,
         isProductivityDialogOpen,
         setIsProductivityDialogOpen,
-        productivityData
+        productivityData,
+        isProductivityFormOpen,
+        setIsProductivityFormOpen,
     } = useAdmin();
 
   return (
@@ -63,6 +66,14 @@ export default function Header() {
                     <DialogTitle>Marketplace Performance</DialogTitle>
                 </DialogHeader>
                 <ProductivityDashboard data={productivityData} />
+            </DialogContent>
+        </Dialog>
+        <Dialog open={isProductivityFormOpen} onOpenChange={setIsProductivityFormOpen}>
+            <DialogContent className="max-w-md">
+                <DialogHeader>
+                    <DialogTitle>Edit Performance</DialogTitle>
+                </DialogHeader>
+                <ProductivityForm />
             </DialogContent>
         </Dialog>
     </header>

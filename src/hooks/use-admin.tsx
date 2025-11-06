@@ -9,6 +9,7 @@ type DailySummaryData = typeof initialDailySummary;
 type HourlyBacklogData = typeof initialHourlyBacklog;
 type PerformanceData = Omit<typeof initialPerformanceData, 'averageHours'>;
 type ProductivityData = typeof initialProductivityData;
+type PerformanceItem = ProductivityData['performance'][0];
 
 const getFromLocalStorage = (key: string, initialValue: any) => {
   if (typeof window === 'undefined') {
@@ -35,10 +36,15 @@ type AdminContextType = {
   setIsDialogOpen: (isOpen: boolean) => void;
   isProductivityDialogOpen: boolean;
   setIsProductivityDialogOpen: (isOpen: boolean) => void;
+  isProductivityFormOpen: boolean;
+  setIsProductivityFormOpen: (isOpen: boolean) => void;
+  editingPerformance: PerformanceItem | null;
+  setEditingPerformance: (item: PerformanceItem | null) => void;
   handleMetricsUpdate: (data: { forecast: number }) => void;
   handleBacklogUpdate: (data: any) => void;
   handleHourlyBacklogUpdate: (data: { hourlyData: { hour: string; value: number }[] }) => void;
   handlePerformanceUpdate: (data: Partial<Omit<PerformanceData, 'totalPacked' | 'averageHoursPacked'>>) => void;
+  handleProductivityUpdate: (data: PerformanceItem) => void;
 };
 
 const AdminContext = createContext<AdminContextType | undefined>(undefined);
@@ -54,6 +60,8 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
   const [isClient, setIsClient] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isProductivityDialogOpen, setIsProductivityDialogOpen] = useState(false);
+  const [isProductivityFormOpen, setIsProductivityFormOpen] = useState(false);
+  const [editingPerformance, setEditingPerformance] = useState<PerformanceItem | null>(null);
 
   useEffect(() => {
     setIsClient(true);
@@ -97,7 +105,7 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
 
   const handleMetricsUpdate = (data: { forecast: number }) => {
     setMetrics((prevMetrics) => {
-        const newMetrics = { ...prevMetrics, forecast: data.forecast };
+        const newMetrics = { ...prevMetrics, forecast: data.forecast, actual: totalPacked };
         newMetrics.fulfillmentRate = data.forecast > 0 ? (dailySummary.day1.actual / data.forecast) * 100 : 0;
         return newMetrics;
     });
@@ -137,7 +145,24 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
       ...data,
     }));
     setIsDialogOpen(false);
-  }
+  };
+
+  const handleProductivityUpdate = (updatedItem: PerformanceItem) => {
+    setProductivityData(prevData => {
+        const newPerformance = prevData.performance.map(item => {
+            if (item.id === updatedItem.id) {
+                const newItem = { ...item, ...updatedItem };
+                newItem.status = newItem.totalOrder >= newItem.targetOrder ? 'BERHASIL' : 'GAGAL';
+                return newItem;
+            }
+            return item;
+        });
+        return { ...prevData, performance: newPerformance };
+    });
+    setIsProductivityFormOpen(false);
+    setEditingPerformance(null);
+};
+
 
   const value = {
     metrics,
@@ -151,10 +176,15 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
     setIsDialogOpen,
     isProductivityDialogOpen,
     setIsProductivityDialogOpen,
+    isProductivityFormOpen,
+    setIsProductivityFormOpen,
+    editingPerformance,
+    setEditingPerformance,
     handleMetricsUpdate,
     handleBacklogUpdate,
     handleHourlyBacklogUpdate,
-    handlePerformanceUpdate
+    handlePerformanceUpdate,
+    handleProductivityUpdate,
   }
 
   return <AdminContext.Provider value={value}>{children}</AdminContext.Provider>;
