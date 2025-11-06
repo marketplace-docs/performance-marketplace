@@ -27,8 +27,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { ScrollArea } from '../ui/scroll-area';
-
 
 type PerformanceData = {
   id: number;
@@ -122,8 +120,7 @@ export default function ProductivityDashboard({ data }: ProductivityDashboardPro
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="mt-4 border rounded-lg overflow-hidden">
-          <ScrollArea className="w-full h-96">
+        <div className="mt-4 border rounded-lg overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -165,7 +162,6 @@ export default function ProductivityDashboard({ data }: ProductivityDashboardPro
                 ))}
               </TableBody>
             </Table>
-          </ScrollArea>
         </div>
         <div className="flex items-center justify-between mt-4">
             <div className="flex items-center gap-2">
