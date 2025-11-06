@@ -7,6 +7,14 @@ import {
   CardTitle,
   CardDescription,
 } from '@/components/ui/card';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { ThumbsUp, ThumbsDown, Pencil, Upload, Download, ChevronLeft, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -39,14 +47,6 @@ type ProductivityDashboardProps = {
     performance: PerformanceData[];
   };
 };
-
-const PerformanceItem = ({ label, value }: { label: string; value: string | number }) => (
-    <div className="flex justify-between items-center text-sm">
-        <span className="text-muted-foreground">{label}</span>
-        <span className="font-semibold">{typeof value === 'number' ? value.toLocaleString() : value}</span>
-    </div>
-);
-
 
 export default function ProductivityDashboard({ data }: ProductivityDashboardProps) {
   const { 
@@ -98,11 +98,12 @@ export default function ProductivityDashboard({ data }: ProductivityDashboardPro
   const currentItems = data.performance.slice(startIndex, endIndex);
 
   return (
-    <div className="w-full">
-        <h2 className="text-xl font-bold mb-4 text-center p-2 bg-destructive text-destructive-foreground rounded-lg">
-            MARKETPLACE PERFORMANCE, {data.date}
-        </h2>
-        <div className="flex gap-2 mb-4">
+    <Card className="w-full">
+      <CardHeader>
+        <CardTitle className="text-xl font-bold text-center p-2 bg-destructive text-destructive-foreground rounded-lg">
+          MARKETPLACE PERFORMANCE, {data.date}
+        </CardTitle>
+        <div className="flex gap-2 pt-4">
             <Button onClick={() => fileInputRef.current?.click()}>
                 <Upload className="mr-2" />
                 Upload CSV
@@ -119,44 +120,50 @@ export default function ProductivityDashboard({ data }: ProductivityDashboardPro
                 Export CSV
             </Button>
         </div>
-        <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-2">
-            {currentItems.map((item) => (
-                <Card key={item.id}>
-                    <CardHeader className="p-4">
-                        <div className="flex justify-between items-start">
-                            <div>
-                                <CardTitle className="text-lg">{item.id}. {item.name || 'Unnamed'}</CardTitle>
-                                <CardDescription>{item.job}</CardDescription>
-                            </div>
-                            <div className='flex items-center gap-2'>
-                                <Badge className={cn("text-center font-bold", item.status === "GAGAL" ? "bg-yellow-400 text-black" : "bg-green-500")}>
-                                    <div className="flex items-center justify-center gap-2">
-                                        <span>{item.status}</span>
-                                        {item.status === "GAGAL" ? <ThumbsDown className="h-4 w-4" /> : <ThumbsUp className="h-4 w-4" />}
-                                    </div>
-                                </Badge>
-                                <Button variant="outline" size="icon" onClick={() => handleEditClick(item)}>
-                                    <Pencil className='h-4 w-4'/>
-                                </Button>
-                            </div>
-                        </div>
-                    </CardHeader>
-                    <CardContent className="p-4 pt-0 space-y-2">
-                        <div className="grid grid-cols-2 gap-4">
-                            <div>
-                                <h4 className="font-semibold mb-1 text-center">Actual</h4>
-                                <PerformanceItem label="Total Order" value={item.totalOrder} />
-                                <PerformanceItem label="Total Qty" value={item.totalQty} />
-                            </div>
-                            <div className="border-l pl-4">
-                                <h4 className="font-semibold mb-1 text-center text-red-500">Target</h4>
-                                <PerformanceItem label="Target Order" value={item.targetOrder} />
-                                <PerformanceItem label="Target Qty" value={item.targetQuantity} />
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card>
-            ))}
+      </CardHeader>
+      <CardContent>
+        <div className="overflow-x-auto">
+          <Table className="min-w-full">
+            <TableHeader>
+              <TableRow>
+                <TableHead>NO</TableHead>
+                <TableHead>NAME</TableHead>
+                <TableHead>JOB</TableHead>
+                <TableHead>TOTAL ORDER</TableHead>
+                <TableHead>TOTAL QTY</TableHead>
+                <TableHead className='text-destructive'>TARGET ORDER</TableHead>
+                <TableHead className='text-destructive'>TARGET QTY</TableHead>
+                <TableHead>STATUS</TableHead>
+                <TableHead>ACTION</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {currentItems.map((item) => (
+                <TableRow key={item.id}>
+                  <TableCell>{item.id}</TableCell>
+                  <TableCell>{item.name || '-'}</TableCell>
+                  <TableCell>{item.job}</TableCell>
+                  <TableCell>{item.totalOrder.toLocaleString()}</TableCell>
+                  <TableCell>{item.totalQty.toLocaleString()}</TableCell>
+                  <TableCell className='text-destructive font-semibold'>{item.targetOrder.toLocaleString()}</TableCell>
+                  <TableCell className='text-destructive font-semibold'>{item.targetQuantity.toLocaleString()}</TableCell>
+                  <TableCell>
+                    <Badge className={cn("text-center font-bold", item.status === "GAGAL" ? "bg-yellow-400 text-black" : "bg-green-500")}>
+                      <div className="flex items-center justify-center gap-1">
+                          <span>{item.status}</span>
+                          {item.status === "GAGAL" ? <ThumbsDown className="h-4 w-4" /> : <ThumbsUp className="h-4 w-4" />}
+                      </div>
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
+                    <Button variant="outline" size="icon" onClick={() => handleEditClick(item)}>
+                        <Pencil className='h-4 w-4'/>
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
         </div>
         <div className="flex items-center justify-between mt-4">
             <div className="flex items-center gap-2">
@@ -202,6 +209,7 @@ export default function ProductivityDashboard({ data }: ProductivityDashboardPro
                 </div>
             </div>
         </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 }
