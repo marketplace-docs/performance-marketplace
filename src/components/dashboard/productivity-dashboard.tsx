@@ -100,10 +100,7 @@ export default function ProductivityDashboard({ data }: ProductivityDashboardPro
   return (
     <Card className="w-full">
       <CardHeader>
-        <CardTitle className="text-xl font-bold text-center p-2 bg-destructive text-destructive-foreground rounded-lg">
-          MARKETPLACE PERFORMANCE, {data.date}
-        </CardTitle>
-        <div className="flex gap-2 pt-4">
+        <div className="flex gap-2 pb-4">
             <Button onClick={() => fileInputRef.current?.click()}>
                 <Upload className="mr-2" />
                 Upload CSV
@@ -120,6 +117,9 @@ export default function ProductivityDashboard({ data }: ProductivityDashboardPro
                 Export CSV
             </Button>
         </div>
+        <CardTitle className="text-xl font-bold text-center p-2 bg-destructive text-destructive-foreground rounded-lg">
+          MARKETPLACE PERFORMANCE, {data.date}
+        </CardTitle>
       </CardHeader>
       <CardContent>
         <div className="overflow-x-auto">
