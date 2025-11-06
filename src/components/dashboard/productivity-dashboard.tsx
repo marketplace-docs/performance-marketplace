@@ -48,40 +48,6 @@ type ProductivityDashboardProps = {
   };
 };
 
-const PerformanceCard = ({ item, onEditClick }: { item: PerformanceData, onEditClick: (item: PerformanceData) => void }) => (
-    <Card className="mb-4">
-      <CardContent className="p-4">
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <p className="text-sm font-medium">{item.name || '-'}</p>
-            <p className="text-sm text-muted-foreground">{item.job}</p>
-          </div>
-          <div className="flex items-center justify-end gap-2">
-            <Badge className={cn("text-center font-bold", item.status === "GAGAL" ? "bg-yellow-400 text-black" : "bg-green-500")}>
-              <div className="flex items-center justify-center gap-1">
-                <span>{item.status}</span>
-                {item.status === "GAGAL" ? <ThumbsDown className="h-4 w-4" /> : <ThumbsUp className="h-4 w-4" />}
-              </div>
-            </Badge>
-            <Button variant="outline" size="icon" onClick={() => onEditClick(item)}>
-              <Pencil className='h-4 w-4' />
-            </Button>
-          </div>
-        </div>
-        <div className="grid grid-cols-2 gap-4 mt-4 text-center">
-            <div>
-                <p className="text-xs text-muted-foreground">Total Order / Qty</p>
-                <p className="font-bold">{item.totalOrder.toLocaleString()} / {item.totalQty.toLocaleString()}</p>
-            </div>
-            <div>
-                <p className="text-xs text-destructive">Target Order / Qty</p>
-                <p className="font-bold text-destructive">{item.targetOrder.toLocaleString()} / {item.targetQuantity.toLocaleString()}</p>
-            </div>
-        </div>
-      </CardContent>
-    </Card>
-);
-
 export default function ProductivityDashboard({ data }: ProductivityDashboardProps) {
   const { 
     setEditingPerformance, 
@@ -156,10 +122,50 @@ export default function ProductivityDashboard({ data }: ProductivityDashboardPro
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="mt-4">
-            {currentItems.map((item) => (
-                <PerformanceCard key={item.id} item={item} onEditClick={handleEditClick} />
-            ))}
+        <div className="mt-4 border rounded-lg overflow-hidden">
+          <ScrollArea className="w-full">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>NO</TableHead>
+                  <TableHead>NAME</TableHead>
+                  <TableHead>JOB</TableHead>
+                  <TableHead>TOTAL ORDER</TableHead>
+                  <TableHead>TOTAL QTY</TableHead>
+                  <TableHead>TARGET ORDER</TableHead>
+                  <TableHead>TARGET QTY</TableHead>
+                  <TableHead>STATUS</TableHead>
+                  <TableHead>ACTION</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {currentItems.map((item, index) => (
+                  <TableRow key={item.id}>
+                    <TableCell>{startIndex + index + 1}</TableCell>
+                    <TableCell>{item.name || '-'}</TableCell>
+                    <TableCell>{item.job}</TableCell>
+                    <TableCell>{item.totalOrder.toLocaleString()}</TableCell>
+                    <TableCell>{item.totalQty.toLocaleString()}</TableCell>
+                    <TableCell className="text-destructive font-bold">{item.targetOrder.toLocaleString()}</TableCell>
+                    <TableCell className="text-destructive font-bold">{item.targetQuantity.toLocaleString()}</TableCell>
+                    <TableCell>
+                      <Badge className={cn("text-center font-bold", item.status === "GAGAL" ? "bg-yellow-400 text-black hover:bg-yellow-500" : "bg-green-500 hover:bg-green-600")}>
+                        <div className="flex items-center justify-center gap-1">
+                          <span>{item.status}</span>
+                          {item.status === "GAGAL" ? <ThumbsDown className="h-4 w-4" /> : <ThumbsUp className="h-4 w-4" />}
+                        </div>
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <Button variant="outline" size="icon" onClick={() => handleEditClick(item)}>
+                        <Pencil className='h-4 w-4' />
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </ScrollArea>
         </div>
         <div className="flex items-center justify-between mt-4">
             <div className="flex items-center gap-2">
