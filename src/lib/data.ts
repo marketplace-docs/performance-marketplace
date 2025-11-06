@@ -9,10 +9,10 @@ export const initialBacklogData = {
     {
       name: "Marketplace",
       statuses: {
-        paymentAccepted: { order: 298, item: 403, avg: 1.4 },
-        inProgress: { order: 296, item: 399, avg: 1.3 },
-        picked: { order: 206, item: 242, avg: 1.2 },
-        packed: { order: 28, item: 38, avg: 1.4 },
+        paymentAccepted: { order: 0, item: 0, avg: 0 },
+        inProgress: { order: 0, item: 0, avg: 0 },
+        picked: { order: 0, item: 0, avg: 0 },
+        packed: { order: 0, item: 0, avg: 0 },
       },
     },
   ],
@@ -25,8 +25,8 @@ export const initialDailySummary = {
 
 export const initialHourlyBacklog = [
   { hour: '00:00', value: 0 },
-  { hour: '01:00', value: 300 },
-  { hour: '02:00', value: 500 },
+  { hour: '01:00', value: 0 },
+  { hour: '02:00', value: 0 },
   { hour: '03:00', value: 0 },
   { hour: '04:00', value: 0 },
   { hour: '05:00', value: 0 },
@@ -51,18 +51,18 @@ export const initialHourlyBacklog = [
 ];
 
 export const initialPerformanceData = {
-  picker: 206,
-  packer: 28,
+  picker: 0,
+  packer: 0,
 };
 
 export const initialProductivityData = {
   date: "6 NOVEMBER 2025",
   performance: [
-    { id: 1, name: "Edi Saputro", job: "Picker", totalOrder: 245, totalQty: 324, targetOrder: 420, targetQuantity: 1085, status: "GAGAL" },
-    { id: 2, name: "Putri Aninda Febriani", job: "Picker", totalOrder: 225, totalQty: 264, targetOrder: 420, targetQuantity: 1085, status: "GAGAL" },
-    { id: 3, name: "Panji Ridwan", job: "Picker", totalOrder: 174, totalQty: 213, targetOrder: 420, targetQuantity: 1085, status: "GAGAL" },
-    { id: 4, name: "Luthfi Aditya", job: "Picker", totalOrder: 159, totalQty: 235, targetOrder: 420, targetQuantity: 1085, status: "GAGAL" },
-    { id: 5, name: "Omar", job: "Picker", totalOrder: 0, totalQty: 0, targetOrder: 420, targetQuantity: 1085, status: "GAGAL" },
+    { id: 1, name: "", job: "Picker", totalOrder: 0, totalQty: 0, targetOrder: 420, targetQuantity: 1085, status: "GAGAL" },
+    { id: 2, name: "", job: "Picker", totalOrder: 0, totalQty: 0, targetOrder: 420, targetQuantity: 1085, status: "GAGAL" },
+    { id: 3, name: "", job: "Picker", totalOrder: 0, totalQty: 0, targetOrder: 420, targetQuantity: 1085, status: "GAGAL" },
+    { id: 4, name: "", job: "Picker", totalOrder: 0, totalQty: 0, targetOrder: 420, targetQuantity: 1085, status: "GAGAL" },
+    { id: 5, name: "", job: "Picker", totalOrder: 0, totalQty: 0, targetOrder: 420, targetQuantity: 1085, status: "GAGAL" },
     { id: 6, name: "", job: "Picker", totalOrder: 0, totalQty: 0, targetOrder: 420, targetQuantity: 1085, status: "GAGAL" },
     { id: 7, name: "", job: "Picker", totalOrder: 0, totalQty: 0, targetOrder: 420, targetQuantity: 1085, status: "GAGAL" },
     { id: 8, name: "", job: "Picker", totalOrder: 0, totalQty: 0, targetOrder: 420, targetQuantity: 1085, status: "GAGAL" },
