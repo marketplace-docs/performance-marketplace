@@ -70,7 +70,7 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
   const [editingPerformance, setEditingPerformance] = useState<PerformanceItem | null>(null);
 
   const [currentPage, setCurrentPage] = useState(1);
-  const [rowsPerPage, setRowsPerPage] = useState<number>(() => getFromLocalStorage('rowsPerPage', 10));
+  const [rowsPerPage, setRowsPerPage] = useState<number>(() => getFromLocalStorage('rowsPerPage', 8));
 
   useEffect(() => {
     setIsClient(true);

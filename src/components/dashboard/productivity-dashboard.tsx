@@ -123,7 +123,7 @@ export default function ProductivityDashboard({ data }: ProductivityDashboardPro
       </CardHeader>
       <CardContent>
         <div className="mt-4 border rounded-lg overflow-hidden">
-          <ScrollArea className="w-full">
+          <ScrollArea className="w-full h-96">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -181,9 +181,11 @@ export default function ProductivityDashboard({ data }: ProductivityDashboardPro
                         <SelectValue placeholder={rowsPerPage} />
                     </SelectTrigger>
                     <SelectContent>
-                        <SelectItem value="10">10</SelectItem>
-                        <SelectItem value="30">30</SelectItem>
+                        <SelectItem value="8">8</SelectItem>
+                        <SelectItem value="12">12</SelectItem>
+                        <SelectItem value="20">20</SelectItem>
                         <SelectItem value="50">50</SelectItem>
+                        <SelectItem value="100">100</SelectItem>
                     </SelectContent>
                 </Select>
             </div>
