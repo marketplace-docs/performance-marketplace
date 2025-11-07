@@ -246,9 +246,9 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
                 const newItem = { ...item, ...updatedItem };
                 let targetOrder = 0;
                 if(newItem.job === 'Picker') {
-                  targetOrder = 750;
+                  targetOrder = 420;
                 } else if (newItem.job === 'Packer') {
-                  targetOrder = 725;
+                  targetOrder = 385;
                 }
                 newItem.status = newItem.totalOrder >= newItem.targetOrder ? 'BERHASIL' : 'GAGAL';
                 return newItem;
@@ -291,10 +291,10 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
               let targetQuantity = 0;
     
               if (jobType === 'Picker') {
-                targetOrder = 750;
+                targetOrder = 420;
                 targetQuantity = 1085;
               } else if (jobType === 'Packer') {
-                targetOrder = 725;
+                targetOrder = 385;
                 targetQuantity = 975;
               }
     
