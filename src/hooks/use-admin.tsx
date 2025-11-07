@@ -129,7 +129,7 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
         targetQuantity: pickerTargetQty,
         targetEndShiftOrder: pickerTargetEndShiftOrder,
         targetEndShiftQuantity: pickerTargetEndShiftQuantity,
-        status: pickerTotalOrder >= pickerTargetOrder ? 'BERHASIL' : 'GAGAL',
+        status: pickerTotalOrder >= pickerTargetEndShiftOrder ? 'BERHASIL' : 'GAGAL',
         progress: pickerTargetEndShiftOrder > 0 ? (pickerTotalOrder / pickerTargetEndShiftOrder) * 100 : 0,
     };
     
@@ -150,7 +150,7 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
       targetQuantity: packerTargetQty,
       targetEndShiftOrder: packerTargetEndShiftOrder,
       targetEndShiftQuantity: packerTargetEndShiftQuantity,
-      status: packerTotalOrder >= packerTargetOrder ? 'BERHASIL' : 'GAGAL',
+      status: packerTotalOrder >= packerTargetEndShiftOrder ? 'BERHASIL' : 'GAGAL',
       progress: packerTargetEndShiftOrder > 0 ? (packerTotalOrder / packerTargetEndShiftOrder) * 100 : 0,
     };
 
