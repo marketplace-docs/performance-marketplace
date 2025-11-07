@@ -191,33 +191,42 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
         skipEmptyLines: true,
         complete: (results) => {
           const uploadedData = results.data as any[];
-          
-          let updatedPerformance = [...(getFromLocalStorage('productivityData', initialProductivityData).performance)];
-
+          if (uploadedData.length === 0) return;
+  
+          // Determine the job type from the first row of the CSV
+          const jobType = uploadedData[0].job;
+          if (jobType !== 'Picker' && jobType !== 'Packer') {
+            console.error("Invalid job type in CSV. Must be 'Picker' or 'Packer'.");
+            // Optionally, show a toast notification to the user
+            return;
+          }
+  
+          const currentPerformance = getFromLocalStorage('productivityData', initialProductivityData).performance;
+  
           const newItems = uploadedData.map(row => {
             const id = parseInt(row.id);
-            if(isNaN(id)) return null;
-
+            if(isNaN(id) || row.job !== jobType) return null; // Process only rows of the detected job type
+  
             const totalOrder = parseInt(row.totalOrder) || 0;
             const totalQty = parseInt(row.totalQty) || 0;
-            const job = row.job || 'Picker';
+            
             let targetOrder = 0;
             let targetQuantity = 0;
-
-            if (job === 'Picker') {
+  
+            if (jobType === 'Picker') {
               targetOrder = 420;
               targetQuantity = 1085;
-            } else if (job === 'Packer') {
+            } else if (jobType === 'Packer') {
               targetOrder = 385;
               targetQuantity = 1050;
             }
-
+  
             const status = totalOrder >= targetOrder ? 'BERHASIL' : 'GAGAL';
-
+  
             return {
               id,
               name: row.name || '',
-              job,
+              job: jobType,
               totalOrder,
               totalQty,
               targetOrder,
@@ -225,12 +234,14 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
               status
             }
           }).filter(Boolean) as PerformanceItem[];
-
-          
-          const itemIds = new Set(newItems.map(i => i.id));
-          updatedPerformance = updatedPerformance.filter(p => !itemIds.has(p.id));
-          updatedPerformance.push(...newItems);
-          updatedPerformance.sort((a, b) => a.id - b.id);
+  
+          const newItemsMap = new Map(newItems.map(item => [item.id, item]));
+  
+          // Keep old data for the other job type, and update/replace data for the uploaded job type
+          const updatedPerformance = currentPerformance
+            .filter(p => p.job !== jobType) // Keep all items of the OTHER job type
+            .concat(newItems) // Add all the new items from the CSV
+            .sort((a, b) => a.id - b.id);
           
           setProductivityData({ performance: updatedPerformance });
         },
@@ -239,13 +250,14 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
         }
       });
     }
+    // Reset file input to allow re-uploading the same file
+    if (event.target) {
+        event.target.value = '';
+    }
   };
   
   const handleProductivityReset = () => {
-    setProductivityData({
-      ...initialProductivityData,
-      performance: initialProductivityData.performance.map(p => ({ ...p, name: "", totalOrder: 0, totalQty: 0, status: "GAGAL" }))
-    });
+    setProductivityData(initialProductivityData);
     setCurrentPage(1);
   };
 
@@ -278,7 +290,7 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
     dailySummary,
     hourlyBacklog,
     performanceData: { ...performanceData, totalPacked, averageHoursPacked },
-    productivityData: productivityData || { performance: [] },
+    productivityData: productivityData,
     isClient,
     isDialogOpen,
     setIsDialogOpen,
@@ -314,3 +326,4 @@ export const useAdmin = () => {
   return context;
 };
  
+    

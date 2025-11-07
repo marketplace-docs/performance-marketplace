@@ -154,18 +154,23 @@ export default function ProductivityDashboard({ data }: ProductivityDashboardPro
     setIsProductivityFormOpen(true);
   };
   
-  const handleExport = () => {
+  const handleExport = (job: 'Picker' | 'Packer') => {
+    const itemsToExport = data.performance.filter(p => p.job === job);
+    if (itemsToExport.length === 0) {
+      alert(`No ${job} data to export.`);
+      return;
+    }
+
     const csvRows = [
-      ["id", "name", "job", "totalOrder", "totalQty", "targetOrder", "targetQuantity", "status"],
-      ...data.performance.map(item => [
+      // Headers
+      ["id", "name", "job", "totalOrder", "totalQty"],
+      // Data
+      ...itemsToExport.map(item => [
         item.id,
         item.name,
         item.job,
         item.totalOrder,
         item.totalQty,
-        item.targetOrder,
-        item.targetQuantity,
-        item.status
       ])
     ];
 
@@ -173,7 +178,7 @@ export default function ProductivityDashboard({ data }: ProductivityDashboardPro
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);
-    link.setAttribute("download", "marketplace_performance.csv");
+    link.setAttribute("download", `template_${job.toLowerCase()}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -209,9 +214,13 @@ export default function ProductivityDashboard({ data }: ProductivityDashboardPro
               accept=".csv" 
               onChange={handleFileUpload}
             />
-            <Button onClick={handleExport}>
+            <Button onClick={() => handleExport('Picker')}>
                 <Download className="mr-2" />
-                Export CSV
+                Template Picker
+            </Button>
+            <Button onClick={() => handleExport('Packer')}>
+                <Download className="mr-2" />
+                Template Packer
             </Button>
              <AlertDialog>
               <AlertDialogTrigger asChild>
@@ -225,7 +234,7 @@ export default function ProductivityDashboard({ data }: ProductivityDashboardPro
                   <AlertDialogTitle>Are you sure?</AlertDialogTitle>
                   <AlertDialogDescription>
                     This action will reset all performance data to its initial state.
-                    You will need to upload a new CSV file to repopulate the data.
+                    This will restore the default empty rows.
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
@@ -347,3 +356,5 @@ export default function ProductivityDashboard({ data }: ProductivityDashboardPro
     </Card>
   );
 }
+
+    
