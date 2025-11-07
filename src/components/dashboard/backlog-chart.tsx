@@ -1,7 +1,6 @@
 'use client';
 
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis, ResponsiveContainer, Tooltip, LabelList } from 'recharts';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 type HourlyData = {
   hour: string;
@@ -17,6 +16,7 @@ const formatNumber = (value: number) => value.toLocaleString();
 export default function BacklogChart({ data }: BacklogChartProps) {
   const maxValue = Math.max(...data.map(d => d.value));
   const yAxisDomain = [0, Math.ceil(maxValue / 625) * 625 || 625];
+  const totalPacked = data.reduce((sum, item) => sum + item.value, 0);
 
   return (
     <div className="mt-6">
@@ -28,7 +28,13 @@ export default function BacklogChart({ data }: BacklogChartProps) {
           </div>
         ))}
       </div>
-      <div className="h-[300px]">
+      <div className="flex justify-end pr-2">
+        <div className="text-right">
+            <div className="text-sm text-muted-foreground">Total Packed</div>
+            <div className="text-2xl font-bold text-destructive">{totalPacked.toLocaleString()}</div>
+        </div>
+      </div>
+      <div className="h-[300px] mt-4">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={data} margin={{ top: 20, right: 20, left: -10, bottom: 5 }}>
             <CartesianGrid strokeDasharray="3 3" vertical={false} />
