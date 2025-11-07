@@ -15,7 +15,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { ThumbsUp, ThumbsDown, Pencil, Upload, Download, ChevronLeft, ChevronRight, RefreshCcw, Trash2 } from 'lucide-react';
+import { ThumbsUp, ThumbsDown, Pencil, Upload, Download, ChevronLeft, ChevronRight, RefreshCcw, Trash2, CalendarIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '../ui/button';
 import { useAdmin } from '@/hooks/use-admin';
@@ -38,6 +38,9 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
+import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
+import { Calendar } from '../ui/calendar';
+import { format } from 'date-fns';
 
 
 type PerformanceData = {
@@ -53,7 +56,6 @@ type PerformanceData = {
 
 type ProductivityDashboardProps = {
   data: {
-    date: string;
     performance: PerformanceData[];
   };
 };
@@ -69,6 +71,8 @@ export default function ProductivityDashboard({ data }: ProductivityDashboardPro
     handleFileUpload,
     handleProductivityReset,
     handleProductivityDelete,
+    productivityDate,
+    setProductivityDate,
   } = useAdmin();
 
   const handleEditClick = (item: PerformanceData) => {
@@ -150,8 +154,23 @@ export default function ProductivityDashboard({ data }: ProductivityDashboardPro
               </AlertDialogContent>
             </AlertDialog>
         </div>
-        <CardTitle className="text-xl font-bold text-center p-2 bg-destructive text-destructive-foreground rounded-lg">
-          MARKETPLACE PERFORMANCE, {data.date}
+        <CardTitle className="relative text-xl font-bold text-center p-2 bg-destructive text-destructive-foreground rounded-lg">
+          MARKETPLACE PERFORMANCE, {format(productivityDate, 'd MMMM yyyy').toUpperCase()}
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="ghost" size="icon" className="absolute top-1/2 right-2 -translate-y-1/2 text-destructive-foreground hover:bg-white/20 hover:text-destructive-foreground">
+                <Pencil className="h-5 w-5" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0">
+              <Calendar
+                mode="single"
+                selected={productivityDate}
+                onSelect={(date) => date && setProductivityDate(date)}
+                initialFocus
+              />
+            </PopoverContent>
+          </Popover>
         </CardTitle>
       </CardHeader>
       <CardContent>

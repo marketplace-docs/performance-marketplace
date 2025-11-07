@@ -56,7 +56,6 @@ export const initialPerformanceData = {
 };
 
 export const initialProductivityData = {
-  date: "",
   performance: [
     { id: 1, name: "", job: "Picker", totalOrder: 0, totalQty: 0, targetOrder: 420, targetQuantity: 1085, status: "GAGAL" },
     { id: 2, name: "", job: "Picker", totalOrder: 0, totalQty: 0, targetOrder: 420, targetQuantity: 1085, status: "GAGAL" },
@@ -92,5 +91,3 @@ export const keyMetrics = { details: [], progress: 0 };
 export const orderStatusBacklog = [];
 export const dailyBreakdown = [];
 export const chartData = { orderStatus: [], dailyProgress: [] };
-
-    

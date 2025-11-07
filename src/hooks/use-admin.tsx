@@ -52,6 +52,8 @@ type AdminContextType = {
   setCurrentPage: (page: number) => void;
   rowsPerPage: number;
   setRowsPerPage: (rows: number) => void;
+  productivityDate: Date;
+  setProductivityDate: (date: Date) => void;
 };
 
 const AdminContext = createContext<AdminContextType | undefined>(undefined);
@@ -62,11 +64,12 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
   const [dailySummary, setDailySummary] = useState<DailySummaryData>(() => getFromLocalStorage('dailySummary', initialDailySummary));
   const [hourlyBacklog, setHourlyBacklog] = useState<HourlyBacklogData>(() => getFromLocalStorage('hourlyBacklog', initialHourlyBacklog));
   const [performanceData, setPerformanceData] = useState<PerformanceData>(() => getFromLocalStorage('performanceData', initialPerformanceData));
-  const [productivityData, setProductivityData] = useState<ProductivityData>(() => {
-    const savedData = getFromLocalStorage('productivityData', initialProductivityData);
-    const currentDate = format(new Date(), 'd MMMM yyyy').toUpperCase();
-    return { ...savedData, date: currentDate };
+  const [productivityData, setProductivityData] = useState<ProductivityData>(() => getFromLocalStorage('productivityData', initialProductivityData));
+  const [productivityDate, setProductivityDate] = useState<Date>(() => {
+    const savedDate = getFromLocalStorage('productivityDate', null);
+    return savedDate ? new Date(savedDate) : new Date();
   });
+
 
   const [isClient, setIsClient] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -78,8 +81,6 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     setIsClient(true);
-    const currentDate = format(new Date(), 'd MMMM yyyy').toUpperCase();
-    setProductivityData(prevData => ({ ...prevData, date: currentDate }));
   }, []);
 
   const { totalPacked, averageHoursPacked } = useMemo(() => {
@@ -112,13 +113,14 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
         window.localStorage.setItem('hourlyBacklog', JSON.stringify(hourlyBacklog));
         window.localStorage.setItem('performanceData', JSON.stringify(performanceData));
         window.localStorage.setItem('productivityData', JSON.stringify(productivityData));
+        window.localStorage.setItem('productivityDate', JSON.stringify(productivityDate));
         window.localStorage.setItem('rowsPerPage', JSON.stringify(rowsPerPage));
 
       } catch (error) {
         console.warn('Error writing to localStorage:', error);
       }
     }
-  }, [isClient, totalPacked, metrics, backlogData, dailySummary, hourlyBacklog, performanceData, productivityData, rowsPerPage]);
+  }, [isClient, totalPacked, metrics, backlogData, dailySummary, hourlyBacklog, performanceData, productivityData, productivityDate, rowsPerPage]);
 
   const handleMetricsUpdate = (data: { forecast: number }) => {
     setMetrics((prevMetrics) => {
@@ -219,11 +221,10 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
   };
   
   const handleProductivityReset = () => {
-    setProductivityData(prevData => ({
+    setProductivityData({
       ...initialProductivityData,
-      date: prevData.date, // Keep the current date
       performance: initialProductivityData.performance.map(p => ({ ...p, name: "", totalOrder: 0, totalQty: 0, status: "GAGAL" }))
-    }));
+    });
     setCurrentPage(1);
   };
 
@@ -271,6 +272,8 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
     setCurrentPage,
     rowsPerPage,
     setRowsPerPage,
+    productivityDate,
+    setProductivityDate,
   }
 
   return <AdminContext.Provider value={value}>{children}</AdminContext.Provider>;
@@ -283,5 +286,3 @@ export const useAdmin = () => {
   }
   return context;
 };
-
-    
