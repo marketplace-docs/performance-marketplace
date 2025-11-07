@@ -20,6 +20,7 @@ import { ThumbsUp, ThumbsDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '../ui/button';
 import { ChevronDown, ChevronUp } from 'lucide-react';
+import { Progress } from '../ui/progress';
 
 type RoleData = {
   jumlah: number;
@@ -29,6 +30,7 @@ type RoleData = {
   targetOrder: number;
   targetQuantity: number;
   status: string;
+  progress: number;
 };
 
 type ProductivityHoursProps = {
@@ -68,6 +70,12 @@ const ProductivityRow = ({ role, data }: { role: string; data: RoleData }) => (
         </div>
       </Badge>
     </TableCell>
+    <TableCell>
+        <div className="flex items-center gap-2">
+            <Progress value={data.progress} className="w-24 h-3" />
+            <span className="text-xs font-medium">{data.progress.toFixed(0)}%</span>
+        </div>
+    </TableCell>
   </TableRow>
 );
 
@@ -92,10 +100,11 @@ export default function ProductivityHours({ data }: ProductivityHoursProps) {
                   <TableHead>Jumlah</TableHead>
                   <TableHead>Total Order</TableHead>
                   <TableHead>Total Quantity</TableHead>
-                  <TableHead>By Hours</TableHead>
+                  <TableHead>Hours</TableHead>
                   <TableHead>Target Order</TableHead>
                   <TableHead>Target Quantity</TableHead>
                   <TableHead>Status</TableHead>
+                  <TableHead>Progress</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>

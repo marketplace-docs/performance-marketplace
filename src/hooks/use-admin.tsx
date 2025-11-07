@@ -110,29 +110,35 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
     const pickerCount = pickers.filter(p => p.name).length;
     const pickerTotalOrder = pickers.reduce((sum, p) => sum + p.totalOrder, 0);
     const pickerTotalQty = pickers.reduce((sum, p) => sum + p.totalQty, 0);
+    const pickerTargetOrder = 750;
+    const pickerTargetQty = 1085;
     
     newHoursData.picker = {
         jumlah: pickerCount,
         totalOrder: pickerTotalOrder,
         totalQuantity: pickerTotalQty,
         byHours: pickerCount > 0 ? Math.round(pickerTotalOrder / pickerCount) : 0,
-        targetOrder: 750,
-        targetQuantity: 1085,
-        status: pickerTotalOrder >= 750 ? 'BERHASIL' : 'GAGAL',
+        targetOrder: pickerTargetOrder,
+        targetQuantity: pickerTargetQty,
+        status: pickerTotalOrder >= pickerTargetOrder ? 'BERHASIL' : 'GAGAL',
+        progress: pickerTargetOrder > 0 ? (pickerTotalOrder / pickerTargetOrder) * 100 : 0,
     };
     
     const packerCount = packers.filter(p => p.name).length;
     const packerTotalOrder = packers.reduce((sum, p) => sum + p.totalOrder, 0);
     const packerTotalQty = packers.reduce((sum, p) => sum + p.totalQty, 0);
+    const packerTargetOrder = 725;
+    const packerTargetQty = 975;
 
     newHoursData.packer = {
       jumlah: packerCount,
       totalOrder: packerTotalOrder,
       totalQuantity: packerTotalQty,
       byHours: packerCount > 0 ? Math.round(packerTotalOrder / packerCount) : 0,
-      targetOrder: 725,
-      targetQuantity: 975,
-      status: packerTotalOrder >= 725 ? 'BERHASIL' : 'GAGAL',
+      targetOrder: packerTargetOrder,
+      targetQuantity: packerTargetQty,
+      status: packerTotalOrder >= packerTargetOrder ? 'BERHASIL' : 'GAGAL',
+      progress: packerTargetOrder > 0 ? (packerTotalOrder / packerTargetOrder) * 100 : 0,
     };
 
     setProductivityHoursData(newHoursData);
@@ -379,5 +385,3 @@ export const useAdmin = () => {
   }
   return context;
 };
-
-    
