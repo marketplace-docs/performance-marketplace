@@ -74,7 +74,7 @@ export default function ProductivityForm() {
                 <FormItem>
                 <FormLabel>Job</FormLabel>
                 <FormControl>
-                    <Input {...field} />
+                    <Input {...field} readOnly disabled />
                 </FormControl>
                 <FormMessage />
                 </FormItem>
@@ -106,8 +106,13 @@ export default function ProductivityForm() {
                 </FormItem>
             )}
             />
-            <Button type="submit">Update</Button>
+            <div className="flex justify-end gap-2">
+              <Button type="button" variant="outline" onClick={() => setIsProductivityFormOpen(false)}>Cancel</Button>
+              <Button type="submit">Update</Button>
+            </div>
         </form>
         </Form>
     );
 }
+
+    

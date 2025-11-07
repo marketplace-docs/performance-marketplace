@@ -110,33 +110,29 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
     const pickerCount = pickers.filter(p => p.name).length;
     const pickerTotalOrder = pickers.reduce((sum, p) => sum + p.totalOrder, 0);
     const pickerTotalQty = pickers.reduce((sum, p) => sum + p.totalQty, 0);
-    const pickerTargetOrder = 45 * pickerCount;
-    const pickerTargetQty = 105 * pickerCount;
     
     newHoursData.picker = {
         jumlah: pickerCount,
         totalOrder: pickerTotalOrder,
         totalQuantity: pickerTotalQty,
-        byHours: pickerCount > 0 ? pickerTotalOrder / pickerCount : 0,
-        targetOrder: pickerTargetOrder,
-        targetQuantity: pickerTargetQty,
-        status: pickerTotalOrder >= pickerTargetOrder ? 'BERHASIL' : 'GAGAL',
+        byHours: pickerCount > 0 ? Math.round(pickerTotalOrder / pickerCount) : 0,
+        targetOrder: 750,
+        targetQuantity: 1085,
+        status: pickerTotalOrder >= 750 ? 'BERHASIL' : 'GAGAL',
     };
     
     const packerCount = packers.filter(p => p.name).length;
     const packerTotalOrder = packers.reduce((sum, p) => sum + p.totalOrder, 0);
     const packerTotalQty = packers.reduce((sum, p) => sum + p.totalQty, 0);
-    const packerTargetOrder = 45 * packerCount;
-    const packerTargetQty = 90 * packerCount;
 
     newHoursData.packer = {
       jumlah: packerCount,
       totalOrder: packerTotalOrder,
       totalQuantity: packerTotalQty,
-      byHours: packerCount > 0 ? packerTotalOrder / packerCount : 0,
-      targetOrder: packerTargetOrder,
-      targetQuantity: packerTargetQty,
-      status: packerTotalOrder >= packerTargetOrder ? 'BERHASIL' : 'GAGAL',
+      byHours: packerCount > 0 ? Math.round(packerTotalOrder / packerCount) : 0,
+      targetOrder: 725,
+      targetQuantity: 975,
+      status: packerTotalOrder >= 725 ? 'BERHASIL' : 'GAGAL',
     };
 
     setProductivityHoursData(newHoursData);
@@ -227,7 +223,13 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
         const newPerformance = prevData.performance.map(item => {
             if (item.id === updatedItem.id) {
                 const newItem = { ...item, ...updatedItem };
-                newItem.status = newItem.totalOrder >= newItem.targetOrder ? 'BERHASIL' : 'GAGAL';
+                let targetOrder = 0;
+                if(newItem.job === 'Picker') {
+                  targetOrder = 420;
+                } else if (newItem.job === 'Packer') {
+                  targetOrder = 385;
+                }
+                newItem.status = newItem.totalOrder >= targetOrder ? 'BERHASIL' : 'GAGAL';
                 return newItem;
             }
             return item;
@@ -377,3 +379,5 @@ export const useAdmin = () => {
   }
   return context;
 };
+
+    
