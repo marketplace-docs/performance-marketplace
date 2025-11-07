@@ -42,6 +42,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
 import { Calendar } from '../ui/calendar';
 import { format } from 'date-fns';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { initialProductivityData } from '@/lib/data';
 
 type PerformanceData = {
   id: number;
@@ -155,22 +156,19 @@ export default function ProductivityDashboard({ data }: ProductivityDashboardPro
   };
   
   const handleExport = (job: 'Picker' | 'Packer') => {
-    const itemsToExport = data.performance.filter(p => p.job === job);
-    if (itemsToExport.length === 0) {
-      alert(`No ${job} data to export.`);
-      return;
-    }
-
+    // Always export the template based on the initial structure
+    const templateItems = initialProductivityData.performance.filter(p => p.job === job);
+    
     const csvRows = [
       // Headers
       ["id", "name", "job", "totalOrder", "totalQty"],
-      // Data
-      ...itemsToExport.map(item => [
+      // Data - empty rows from template
+      ...templateItems.map(item => [
         item.id,
-        item.name,
+        "", // name
         item.job,
-        item.totalOrder,
-        item.totalQty,
+        0, // totalOrder
+        0, // totalQty
       ])
     ];
 
@@ -356,5 +354,3 @@ export default function ProductivityDashboard({ data }: ProductivityDashboardPro
     </Card>
   );
 }
-
-    
