@@ -1,8 +1,11 @@
+import PerformanceSummary from "./performance-summary";
+
 type KeyMetricsProps = {
   metrics: {
     forecast: number;
     actual: number;
     fulfillmentRate: number;
+    totalPacked: number;
   };
 };
 
@@ -26,10 +29,13 @@ const MetricItem = ({ label, value, isPercentage = false }: { label: string; val
 
 export default function KeyMetrics({ metrics }: KeyMetricsProps) {
   return (
-    <div className="grid grid-cols-[auto_1fr_auto_1fr_auto_1fr] border-t border-l">
-      <MetricItem label="Forecast" value={metrics.forecast.toLocaleString()} />
-      <MetricItem label="Actual Order" value={metrics.actual.toLocaleString()} />
-      <MetricItem label="Fulfillment Rate" value={metrics.fulfillmentRate} isPercentage />
+    <div>
+      <div className="grid grid-cols-[auto_1fr_auto_1fr_auto_1fr] border-t border-l">
+        <MetricItem label="Forecast" value={metrics.forecast.toLocaleString()} />
+        <MetricItem label="Actual Order" value={metrics.actual.toLocaleString()} />
+        <MetricItem label="Fulfillment Rate" value={metrics.fulfillmentRate} isPercentage />
+      </div>
+      <PerformanceSummary data={{ totalPacked: metrics.totalPacked }} />
     </div>
   );
 }

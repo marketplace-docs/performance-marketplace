@@ -13,10 +13,11 @@ type Metrics = {
   forecast: number;
   actual: number;
   fulfillmentRate: number;
+  totalPacked: number;
 };
 
 export default function Home() {
-  const { metrics, backlogData, dailySummary, hourlyBacklog, performanceData, isClient, productivityData, productivityHoursData } = useAdmin();
+  const { metrics, backlogData, dailySummary, hourlyBacklog, productivityData, isClient, productivityHoursData } = useAdmin();
 
   if (!isClient) {
     return null;
@@ -32,7 +33,7 @@ export default function Home() {
           <DailySummary data={dailySummary} />
         </div>
       </div>
-      <Backlog data={backlogData} hourlyData={hourlyBacklog} performanceData={performanceData} />
+      <Backlog data={backlogData} hourlyData={hourlyBacklog} />
       <ProductivityMenu>
         <ProductivityDashboard data={productivityData} />
       </ProductivityMenu>

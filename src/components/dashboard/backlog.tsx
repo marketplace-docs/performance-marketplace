@@ -18,7 +18,6 @@ import {
 import { Button } from '@/components/ui/button';
 import { ChevronUp, ChevronDown } from 'lucide-react';
 import BacklogChart from './backlog-chart';
-import PerformanceSummary from './performance-summary';
 
 type Status = {
   order: number;
@@ -41,22 +40,14 @@ type HourlyData = {
   value: number;
 }[];
 
-type PerformanceData = {
-  picker: number;
-  packer: number;
-  totalPacked: number;
-  averageHoursPacked: number;
-}
-
 type BacklogProps = {
   data: {
     types: DataType[];
   };
   hourlyData: HourlyData;
-  performanceData: PerformanceData;
 };
 
-export default function Backlog({ data, hourlyData, performanceData }: BacklogProps) {
+export default function Backlog({ data, hourlyData }: BacklogProps) {
   const [isOpen, setIsOpen] = useState(true);
 
   return (
@@ -116,7 +107,6 @@ export default function Backlog({ data, hourlyData, performanceData }: BacklogPr
               </TableBody>
             </Table>
           </div>
-          <PerformanceSummary data={performanceData} />
           <BacklogChart data={hourlyData} />
         </CardContent>
       )}

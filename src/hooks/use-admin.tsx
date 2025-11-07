@@ -37,7 +37,7 @@ const getFromLocalStorage = (key: string, initialValue: any) => {
 };
 
 type AdminContextType = {
-  metrics: Metrics;
+  metrics: Metrics & { totalPacked: number };
   backlogData: BacklogData;
   dailySummary: DailySummaryData;
   hourlyBacklog: HourlyBacklogData;
@@ -117,8 +117,8 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
     const pickerTotalQty = pickers.reduce((sum, p) => sum + p.totalQty, 0);
     const pickerTargetOrder = 750;
     const pickerTargetQty = 1085;
-    const pickerTargetEndShiftOrder = pickerTargetOrder * workingHours;
-    const pickerTargetEndShiftQuantity = pickerTargetQty * workingHours;
+    const pickerTargetEndShiftOrder = pickerTargetOrder;
+    const pickerTargetEndShiftQuantity = pickerTargetQty;
     
     newHoursData.picker = {
         jumlah: pickerCount,
@@ -128,10 +128,10 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
         averageQuantityHours: pickerCount > 0 ? Math.round(pickerTotalQty / pickerCount) : 0,
         targetOrder: pickerTargetOrder,
         targetQuantity: pickerTargetQty,
-        targetEndShiftOrder: pickerTargetEndShiftOrder,
-        targetEndShiftQuantity: pickerTargetEndShiftQuantity,
-        status: pickerTotalOrder >= pickerTargetEndShiftOrder ? 'BERHASIL' : 'GAGAL',
-        progress: pickerTargetEndShiftOrder > 0 ? (pickerTotalOrder / pickerTargetEndShiftOrder) * 100 : 0,
+        targetEndShiftOrder: pickerTargetEndShiftOrder * workingHours,
+        targetEndShiftQuantity: pickerTargetEndShiftQuantity * workingHours,
+        status: pickerTotalOrder >= pickerTargetEndShiftOrder * workingHours ? 'BERHASIL' : 'GAGAL',
+        progress: pickerTargetEndShiftOrder > 0 ? (pickerTotalOrder / (pickerTargetEndShiftOrder * workingHours)) * 100 : 0,
     };
     
     const packerCount = packers.filter(p => p.name).length;
@@ -139,8 +139,8 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
     const packerTotalQty = packers.reduce((sum, p) => sum + p.totalQty, 0);
     const packerTargetOrder = 725;
     const packerTargetQty = 975;
-    const packerTargetEndShiftOrder = packerTargetOrder * workingHours;
-    const packerTargetEndShiftQuantity = packerTargetQty * workingHours;
+    const packerTargetEndShiftOrder = packerTargetOrder;
+    const packerTargetEndShiftQuantity = packerTargetQty;
 
     newHoursData.packer = {
       jumlah: packerCount,
@@ -150,10 +150,10 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
       averageQuantityHours: packerCount > 0 ? Math.round(packerTotalQty / packerCount) : 0,
       targetOrder: packerTargetOrder,
       targetQuantity: packerTargetQty,
-      targetEndShiftOrder: packerTargetEndShiftOrder,
-      targetEndShiftQuantity: packerTargetEndShiftQuantity,
-      status: packerTotalOrder >= packerTargetEndShiftOrder ? 'BERHASIL' : 'GAGAL',
-      progress: packerTargetEndShiftOrder > 0 ? (packerTotalOrder / packerTargetEndShiftOrder) * 100 : 0,
+      targetEndShiftOrder: packerTargetEndShiftOrder * workingHours,
+      targetEndShiftQuantity: packerTargetEndShiftQuantity * workingHours,
+      status: packerTotalOrder >= packerTargetEndShiftOrder * workingHours ? 'BERHASIL' : 'GAGAL',
+      progress: packerTargetEndShiftOrder > 0 ? (packerTotalOrder / (packerTargetEndShiftOrder * workingHours)) * 100 : 0,
     };
 
     setProductivityHoursData(newHoursData);
@@ -360,7 +360,7 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const value = {
-    metrics,
+    metrics: { ...metrics, totalPacked },
     backlogData,
     dailySummary,
     hourlyBacklog,
