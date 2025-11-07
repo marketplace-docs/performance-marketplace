@@ -124,7 +124,8 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
         jumlah: pickerCount,
         totalOrder: pickerTotalOrder,
         totalQuantity: pickerTotalQty,
-        byHours: pickerCount > 0 ? Math.round(pickerTotalOrder / pickerCount) : 0,
+        averageOrderHours: pickerCount > 0 ? Math.round(pickerTotalOrder / pickerCount) : 0,
+        averageQuantityHours: pickerCount > 0 ? Math.round(pickerTotalQty / pickerCount) : 0,
         targetOrder: pickerTargetOrder,
         targetQuantity: pickerTargetQty,
         targetEndShiftOrder: pickerTargetEndShiftOrder,
@@ -145,7 +146,8 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
       jumlah: packerCount,
       totalOrder: packerTotalOrder,
       totalQuantity: packerTotalQty,
-      byHours: packerCount > 0 ? Math.round(packerTotalOrder / packerCount) : 0,
+      averageOrderHours: packerCount > 0 ? Math.round(packerTotalOrder / packerCount) : 0,
+      averageQuantityHours: packerCount > 0 ? Math.round(packerTotalQty / packerCount) : 0,
       targetOrder: packerTargetOrder,
       targetQuantity: packerTargetQty,
       targetEndShiftOrder: packerTargetEndShiftOrder,
@@ -248,7 +250,7 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
                 } else if (newItem.job === 'Packer') {
                   targetOrder = 725;
                 }
-                newItem.status = newItem.totalOrder >= targetOrder ? 'BERHASIL' : 'GAGAL';
+                newItem.status = newItem.totalOrder >= newItem.targetOrder ? 'BERHASIL' : 'GAGAL';
                 return newItem;
             }
             return item;

@@ -26,7 +26,8 @@ type RoleData = {
   jumlah: number;
   totalOrder: number;
   totalQuantity: number;
-  byHours: number;
+  averageOrderHours: number;
+  averageQuantityHours: number;
   targetOrder: number;
   targetQuantity: number;
   targetEndShiftOrder: number;
@@ -61,7 +62,8 @@ const ProductivityRow = ({ role, data }: { role: string; data: RoleData }) => (
     <TableCell>{data.jumlah.toLocaleString()}</TableCell>
     <TableCell>{data.totalOrder.toLocaleString()}</TableCell>
     <TableCell>{data.totalQuantity.toLocaleString()}</TableCell>
-    <TableCell>{formatNumber(data.byHours)}</TableCell>
+    <TableCell>{formatNumber(data.averageOrderHours)}</TableCell>
+    <TableCell>{formatNumber(data.averageQuantityHours)}</TableCell>
     <TableCell className="text-destructive font-bold">{data.targetOrder.toLocaleString()}</TableCell>
     <TableCell className="text-destructive font-bold">{data.targetQuantity.toLocaleString()}</TableCell>
     <TableCell className="text-destructive font-bold">{data.targetEndShiftOrder.toLocaleString()}</TableCell>
@@ -104,7 +106,8 @@ export default function ProductivityHours({ data }: ProductivityHoursProps) {
                   <TableHead>Jumlah</TableHead>
                   <TableHead>Total Order</TableHead>
                   <TableHead>Total Quantity</TableHead>
-                  <TableHead>Hours</TableHead>
+                  <TableHead>Avg Order Hours</TableHead>
+                  <TableHead>Avg Quantity Hours</TableHead>
                   <TableHead>Target Order Hours</TableHead>
                   <TableHead>Target Quantity Hours</TableHead>
                   <TableHead>Target End Shift Order</TableHead>
