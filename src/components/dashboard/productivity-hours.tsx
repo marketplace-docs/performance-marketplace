@@ -29,6 +29,8 @@ type RoleData = {
   byHours: number;
   targetOrder: number;
   targetQuantity: number;
+  targetEndShiftOrder: number;
+  targetEndShiftQuantity: number;
   status: string;
   progress: number;
 };
@@ -62,6 +64,8 @@ const ProductivityRow = ({ role, data }: { role: string; data: RoleData }) => (
     <TableCell>{formatNumber(data.byHours)}</TableCell>
     <TableCell className="text-destructive font-bold">{data.targetOrder.toLocaleString()}</TableCell>
     <TableCell className="text-destructive font-bold">{data.targetQuantity.toLocaleString()}</TableCell>
+    <TableCell className="text-destructive font-bold">{data.targetEndShiftOrder.toLocaleString()}</TableCell>
+    <TableCell className="text-destructive font-bold">{data.targetEndShiftQuantity.toLocaleString()}</TableCell>
     <TableCell>
       <Badge className={cn("text-center font-bold", data.status === "GAGAL" ? "bg-yellow-400 text-black hover:bg-yellow-500" : "bg-green-500 hover:bg-green-600")}>
         <div className="flex items-center justify-center gap-1">
@@ -103,6 +107,8 @@ export default function ProductivityHours({ data }: ProductivityHoursProps) {
                   <TableHead>Hours</TableHead>
                   <TableHead>Target Order Hours</TableHead>
                   <TableHead>Target Quantity Hours</TableHead>
+                  <TableHead>Target End Shift Order</TableHead>
+                  <TableHead>Target End Shift Quantity</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Progress</TableHead>
                 </TableRow>

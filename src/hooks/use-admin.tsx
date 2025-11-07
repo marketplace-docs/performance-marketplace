@@ -22,8 +22,12 @@ const getFromLocalStorage = (key: string, initialValue: any) => {
   try {
     const item = window.localStorage.getItem(key);
     // When resetting, the value might be an empty array which is valid.
-    if (item === "{\"performance\":[]}") {
+    if (key === 'productivityData' && item) {
+      const parsed = JSON.parse(item);
+      if (!parsed.performance) {
         return { performance: [] };
+      }
+      return parsed;
     }
     return item ? JSON.parse(item) : initialValue;
   } catch (error) {
@@ -103,6 +107,7 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     const newHoursData = { ...initialProductivityHoursData };
     const performance = productivityData.performance || [];
+    const workingHours = 10;
     
     const pickers = performance.filter(p => p.job === 'Picker');
     const packers = performance.filter(p => p.job === 'Packer');
@@ -112,6 +117,8 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
     const pickerTotalQty = pickers.reduce((sum, p) => sum + p.totalQty, 0);
     const pickerTargetOrder = 750;
     const pickerTargetQty = 1085;
+    const pickerTargetEndShiftOrder = pickerTargetOrder * workingHours;
+    const pickerTargetEndShiftQuantity = pickerTargetQty * workingHours;
     
     newHoursData.picker = {
         jumlah: pickerCount,
@@ -120,8 +127,10 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
         byHours: pickerCount > 0 ? Math.round(pickerTotalOrder / pickerCount) : 0,
         targetOrder: pickerTargetOrder,
         targetQuantity: pickerTargetQty,
+        targetEndShiftOrder: pickerTargetEndShiftOrder,
+        targetEndShiftQuantity: pickerTargetEndShiftQuantity,
         status: pickerTotalOrder >= pickerTargetOrder ? 'BERHASIL' : 'GAGAL',
-        progress: pickerTargetOrder > 0 ? (pickerTotalOrder / pickerTargetOrder) * 100 : 0,
+        progress: pickerTargetEndShiftOrder > 0 ? (pickerTotalOrder / pickerTargetEndShiftOrder) * 100 : 0,
     };
     
     const packerCount = packers.filter(p => p.name).length;
@@ -129,6 +138,8 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
     const packerTotalQty = packers.reduce((sum, p) => sum + p.totalQty, 0);
     const packerTargetOrder = 725;
     const packerTargetQty = 975;
+    const packerTargetEndShiftOrder = packerTargetOrder * workingHours;
+    const packerTargetEndShiftQuantity = packerTargetQty * workingHours;
 
     newHoursData.packer = {
       jumlah: packerCount,
@@ -137,8 +148,10 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
       byHours: packerCount > 0 ? Math.round(packerTotalOrder / packerCount) : 0,
       targetOrder: packerTargetOrder,
       targetQuantity: packerTargetQty,
+      targetEndShiftOrder: packerTargetEndShiftOrder,
+      targetEndShiftQuantity: packerTargetEndShiftQuantity,
       status: packerTotalOrder >= packerTargetOrder ? 'BERHASIL' : 'GAGAL',
-      progress: packerTargetOrder > 0 ? (packerTotalOrder / packerTargetOrder) * 100 : 0,
+      progress: packerTargetEndShiftOrder > 0 ? (packerTotalOrder / packerTargetEndShiftOrder) * 100 : 0,
     };
 
     setProductivityHoursData(newHoursData);
@@ -262,52 +275,47 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
             return;
           }
   
-          const currentPerformance = (getFromLocalStorage('productivityData', initialProductivityData) as ProductivityData).performance;
-  
-          const newItems = uploadedData.map(row => {
-            const id = parseInt(row.id);
-            if(isNaN(id) || row.job !== jobType) return null;
-  
-            const totalOrder = parseInt(row.totalOrder) || 0;
-            const totalQty = parseInt(row.totalQty) || 0;
+          setProductivityData(prevData => {
+            const currentPerformance = prevData.performance;
+
+            const newItems = uploadedData.map(row => {
+              const id = parseInt(row.id);
+              if(isNaN(id) || row.job !== jobType) return null;
+    
+              const totalOrder = parseInt(row.totalOrder) || 0;
+              const totalQty = parseInt(row.totalQty) || 0;
+              
+              let targetOrder = 0;
+              let targetQuantity = 0;
+    
+              if (jobType === 'Picker') {
+                targetOrder = 420;
+                targetQuantity = 1085;
+              } else if (jobType === 'Packer') {
+                targetOrder = 385;
+                targetQuantity = 1050;
+              }
+    
+              const status = totalOrder >= targetOrder ? 'BERHASIL' : 'GAGAL';
+    
+              return {
+                id,
+                name: row.name || '',
+                job: jobType,
+                totalOrder,
+                totalQty,
+                targetOrder,
+                targetQuantity,
+                status
+              }
+            }).filter(Boolean) as PerformanceItem[];
+    
+            const otherJobTypeData = currentPerformance.filter(p => p.job !== jobType);
             
-            let targetOrder = 0;
-            let targetQuantity = 0;
-  
-            if (jobType === 'Picker') {
-              targetOrder = 420;
-              targetQuantity = 1085;
-            } else if (jobType === 'Packer') {
-              targetOrder = 385;
-              targetQuantity = 1050;
-            }
-  
-            const status = totalOrder >= targetOrder ? 'BERHASIL' : 'GAGAL';
-  
-            return {
-              id,
-              name: row.name || '',
-              job: jobType,
-              totalOrder,
-              totalQty,
-              targetOrder,
-              targetQuantity,
-              status
-            }
-          }).filter(Boolean) as PerformanceItem[];
-  
-  
-          const otherJobTypeData = currentPerformance.filter(p => p.job !== jobType);
-          const existingTemplateDataForJob = initialProductivityData.performance.filter(p => p.job === jobType);
-
-          const finalDataForJob = existingTemplateDataForJob.map(templateItem => {
-              const uploadedItem = newItems.find(newItem => newItem.id === templateItem.id);
-              return uploadedItem || templateItem;
+            const updatedPerformance = [...otherJobTypeData, ...newItems].sort((a,b) => a.id - b.id);
+            
+            return { performance: updatedPerformance };
           });
-
-          const updatedPerformance = [...otherJobTypeData, ...finalDataForJob].sort((a,b) => a.id - b.id);
-          
-          setProductivityData({ performance: updatedPerformance });
         },
         error: (error: any) => {
           console.error("Error parsing CSV:", error);
