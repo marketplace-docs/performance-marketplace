@@ -118,7 +118,6 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
     const pickerTargetOrder = 750;
     const pickerTargetQty = 1085;
     const pickerTargetEndShiftOrder = pickerTargetOrder;
-    const pickerTargetEndShiftQuantity = pickerTargetQty;
     
     newHoursData.picker = {
         jumlah: pickerCount,
@@ -129,7 +128,7 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
         targetOrder: pickerTargetOrder,
         targetQuantity: pickerTargetQty,
         targetEndShiftOrder: pickerTargetEndShiftOrder * workingHours,
-        targetEndShiftQuantity: pickerTargetEndShiftQuantity * workingHours,
+        targetEndShiftQuantity: pickerTargetQty * workingHours,
         status: pickerTotalOrder >= pickerTargetEndShiftOrder * workingHours ? 'BERHASIL' : 'GAGAL',
         progress: pickerTargetEndShiftOrder > 0 ? (pickerTotalOrder / (pickerTargetEndShiftOrder * workingHours)) * 100 : 0,
     };
@@ -140,7 +139,6 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
     const packerTargetOrder = 725;
     const packerTargetQty = 975;
     const packerTargetEndShiftOrder = packerTargetOrder;
-    const packerTargetEndShiftQuantity = packerTargetQty;
 
     newHoursData.packer = {
       jumlah: packerCount,
@@ -151,7 +149,7 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
       targetOrder: packerTargetOrder,
       targetQuantity: packerTargetQty,
       targetEndShiftOrder: packerTargetEndShiftOrder * workingHours,
-      targetEndShiftQuantity: packerTargetEndShiftQuantity * workingHours,
+      targetEndShiftQuantity: packerTargetQty * workingHours,
       status: packerTotalOrder >= packerTargetEndShiftOrder * workingHours ? 'BERHASIL' : 'GAGAL',
       progress: packerTargetEndShiftOrder > 0 ? (packerTotalOrder / (packerTargetEndShiftOrder * workingHours)) * 100 : 0,
     };
@@ -212,8 +210,7 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
       const updateStatus = (status: 'paymentAccepted' | 'inProgress' | 'picked' | 'packed') => {
         const order = data[status]?.order ?? marketplaceData.statuses[status].order;
         const item = data[status]?.item ?? marketplaceData.statuses[status].item;
-        const avg = order > 0 ? item / order : 0;
-        marketplaceData.statuses[status] = { order, item, avg };
+        marketplaceData.statuses[status] = { order, item, avg: order > 0 ? item / order : 0 };
       };
 
       updateStatus('paymentAccepted');

@@ -66,17 +66,16 @@ export default function Backlog({ data, hourlyData }: BacklogProps) {
                 <TableRow>
                   <TableHead rowSpan={2} className="border-r">#</TableHead>
                   <TableHead rowSpan={2} className="border-r">Type</TableHead>
-                  <TableHead colSpan={3} className="text-center border-r">Payment accepted</TableHead>
-                  <TableHead colSpan={3} className="text-center border-r">In Progress</TableHead>
-                  <TableHead colSpan={3} className="text-center border-r">Picked</TableHead>
-                  <TableHead colSpan={3} className="text-center">Packed</TableHead>
+                  <TableHead colSpan={2} className="text-center border-r">Payment accepted</TableHead>
+                  <TableHead colSpan={2} className="text-center border-r">In Progress</TableHead>
+                  <TableHead colSpan={2} className="text-center border-r">Picked</TableHead>
+                  <TableHead colSpan={2} className="text-center">Packed</TableHead>
                 </TableRow>
                 <TableRow>
                   {Array(4).fill(0).map((_, i) => (
                     <Fragment key={i}>
                       <TableHead className="border-r">Order</TableHead>
-                      <TableHead className="border-r">Item</TableHead>
-                      <TableHead className={i === 3 ? "" : "border-r"}>Avg</TableHead>
+                      <TableHead className={i === 3 ? "" : "border-r"}>Item</TableHead>
                     </Fragment>
                   ))}
                 </TableRow>
@@ -89,19 +88,15 @@ export default function Backlog({ data, hourlyData }: BacklogProps) {
                     
                     <TableCell className="text-right border-r">{type.statuses.paymentAccepted.order.toLocaleString()}</TableCell>
                     <TableCell className="text-right border-r">{type.statuses.paymentAccepted.item.toLocaleString()}</TableCell>
-                    <TableCell className="text-right border-r">{type.statuses.paymentAccepted.avg.toFixed(1)}</TableCell>
 
                     <TableCell className="text-right border-r">{type.statuses.inProgress.order.toLocaleString()}</TableCell>
                     <TableCell className="text-right border-r">{type.statuses.inProgress.item.toLocaleString()}</TableCell>
-                    <TableCell className="text-right border-r">{type.statuses.inProgress.avg.toFixed(1)}</TableCell>
 
                     <TableCell className="text-right border-r">{type.statuses.picked.order.toLocaleString()}</TableCell>
                     <TableCell className="text-right border-r">{type.statuses.picked.item.toLocaleString()}</TableCell>
-                    <TableCell className="text-right border-r">{type.statuses.picked.avg.toFixed(1)}</TableCell>
 
                     <TableCell className="text-right border-r">{type.statuses.packed.order.toLocaleString()}</TableCell>
-                    <TableCell className="text-right border-r">{type.statuses.packed.item.toLocaleString()}</TableCell>
-                    <TableCell className="text-right">{type.statuses.packed.avg.toFixed(1)}</TableCell>
+                    <TableCell className="text-right">{type.statuses.packed.item.toLocaleString()}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
