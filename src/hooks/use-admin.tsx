@@ -1,7 +1,7 @@
 'use client';
 
 import { createContext, useContext, useState, useEffect, ReactNode, useMemo } from 'react';
-import { initialMetrics, initialBacklogData, initialDailySummary, initialHourlyBacklog, initialPerformanceData, initialProductivityData } from '@/lib/data';
+import { initialMetrics, initialBacklogData, initialDailySummary, initialHourlyBacklog, initialPerformanceData, initialProductivityData, initialProductivityHoursData } from '@/lib/data';
 import Papa from 'papaparse';
 import { format } from 'date-fns';
 
@@ -12,6 +12,8 @@ type HourlyBacklogData = typeof initialHourlyBacklog;
 type PerformanceData = Omit<typeof initialPerformanceData, 'averageHours'>;
 type ProductivityData = typeof initialProductivityData;
 type PerformanceItem = ProductivityData['performance'][0];
+type ProductivityHoursData = typeof initialProductivityHoursData;
+
 
 const getFromLocalStorage = (key: string, initialValue: any) => {
   if (typeof window === 'undefined') {
@@ -33,6 +35,7 @@ type AdminContextType = {
   hourlyBacklog: HourlyBacklogData;
   performanceData: PerformanceData & { totalPacked: number, averageHoursPacked: number };
   productivityData: ProductivityData;
+  productivityHoursData: ProductivityHoursData;
   isClient: boolean;
   isDialogOpen: boolean;
   setIsDialogOpen: (isOpen: boolean) => void;
@@ -66,6 +69,8 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
   const [hourlyBacklog, setHourlyBacklog] = useState<HourlyBacklogData>(() => getFromLocalStorage('hourlyBacklog', initialHourlyBacklog));
   const [performanceData, setPerformanceData] = useState<PerformanceData>(() => getFromLocalStorage('performanceData', initialPerformanceData));
   const [productivityData, setProductivityData] = useState<ProductivityData>(() => getFromLocalStorage('productivityData', initialProductivityData));
+  const [productivityHoursData, setProductivityHoursData] = useState<ProductivityHoursData>(() => getFromLocalStorage('productivityHoursData', initialProductivityHoursData));
+
   const [productivityDate, setProductivityDate] = useState<Date>(() => {
     const savedDate = getFromLocalStorage('productivityDate', null);
     return savedDate ? new Date(savedDate) : new Date();
@@ -90,6 +95,34 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
     const average = activeHours > 0 ? total / activeHours : 0;
     return { totalPacked: total, averageHoursPacked: Math.round(average) };
   }, [hourlyBacklog]);
+  
+  useEffect(() => {
+    const newHoursData = { ...initialProductivityHoursData };
+    
+    const pickers = productivityData.performance.filter(p => p.job === 'Picker');
+    const packers = productivityData.performance.filter(p => p.job === 'Packer');
+
+    newHoursData.picker.jumlah = pickers.filter(p => p.name).length;
+    newHoursData.picker.totalOrder = pickers.reduce((sum, p) => sum + p.totalOrder, 0);
+    newHoursData.picker.totalQuantity = pickers.reduce((sum, p) => sum + p.totalQty, 0);
+    newHoursData.picker.targetOrder = pickers.reduce((sum, p) => sum + p.targetOrder, 0);
+    newHoursData.picker.targetQuantity = pickers.reduce((sum, p) => sum + p.targetQuantity, 0);
+    newHoursData.picker.byHours = newHoursData.picker.jumlah > 0 ? newHoursData.picker.totalOrder / newHoursData.picker.jumlah : 0;
+    newHoursData.picker.status = newHoursData.picker.totalOrder >= newHoursData.picker.targetOrder ? 'BERHASIL' : 'GAGAL';
+
+
+    newHoursData.packer.jumlah = packers.filter(p => p.name).length;
+    newHoursData.packer.totalOrder = packers.reduce((sum, p) => sum + p.totalOrder, 0);
+    newHoursData.packer.totalQuantity = packers.reduce((sum, p) => sum + p.totalQty, 0);
+    newHoursData.packer.targetOrder = packers.reduce((sum, p) => sum + p.targetOrder, 0);
+    newHoursData.packer.targetQuantity = packers.reduce((sum, p) => sum + p.targetQuantity, 0);
+    newHoursData.packer.byHours = newHoursData.packer.jumlah > 0 ? newHoursData.packer.totalOrder / newHoursData.packer.jumlah : 0;
+    newHoursData.packer.status = newHoursData.packer.totalOrder >= newHoursData.packer.targetOrder ? 'BERHASIL' : 'GAGAL';
+
+    setProductivityHoursData(newHoursData);
+
+  }, [productivityData]);
+
 
   useEffect(() => {
     if (isClient) {
@@ -116,12 +149,14 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
         window.localStorage.setItem('productivityData', JSON.stringify(productivityData));
         window.localStorage.setItem('productivityDate', JSON.stringify(productivityDate));
         window.localStorage.setItem('rowsPerPage', JSON.stringify(rowsPerPage));
+        window.localStorage.setItem('productivityHoursData', JSON.stringify(productivityHoursData));
+
 
       } catch (error) {
         console.warn('Error writing to localStorage:', error);
       }
     }
-  }, [isClient, totalPacked, metrics, backlogData, dailySummary, hourlyBacklog, performanceData, productivityData, productivityDate, rowsPerPage]);
+  }, [isClient, totalPacked, metrics, backlogData, dailySummary, hourlyBacklog, performanceData, productivityData, productivityDate, rowsPerPage, productivityHoursData]);
 
   const handleMetricsUpdate = (data: { forecast: number }) => {
     setMetrics((prevMetrics) => {
@@ -193,11 +228,9 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
           const uploadedData = results.data as any[];
           if (uploadedData.length === 0) return;
   
-          // Determine the job type from the first row of the CSV
           const jobType = uploadedData[0].job;
           if (jobType !== 'Picker' && jobType !== 'Packer') {
             console.error("Invalid job type in CSV. Must be 'Picker' or 'Packer'.");
-            // Optionally, show a toast notification to the user
             return;
           }
   
@@ -205,7 +238,7 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
   
           const newItems = uploadedData.map(row => {
             const id = parseInt(row.id);
-            if(isNaN(id) || row.job !== jobType) return null; // Process only rows of the detected job type
+            if(isNaN(id) || row.job !== jobType) return null;
   
             const totalOrder = parseInt(row.totalOrder) || 0;
             const totalQty = parseInt(row.totalQty) || 0;
@@ -235,13 +268,16 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
             }
           }).filter(Boolean) as PerformanceItem[];
   
-          const newItemsMap = new Map(newItems.map(item => [item.id, item]));
   
-          // Keep old data for the other job type, and update/replace data for the uploaded job type
-          const updatedPerformance = currentPerformance
-            .filter(p => p.job !== jobType) // Keep all items of the OTHER job type
-            .concat(newItems) // Add all the new items from the CSV
-            .sort((a, b) => a.id - b.id);
+          const otherJobTypeData = currentPerformance.filter(p => p.job !== jobType);
+          const existingTemplateData = initialProductivityData.performance.filter(p => p.job === jobType);
+
+          const finalData = existingTemplateData.map(templateItem => {
+              const uploadedItem = newItems.find(newItem => newItem.id === templateItem.id);
+              return uploadedItem || templateItem;
+          });
+
+          const updatedPerformance = [...otherJobTypeData, ...finalData].sort((a,b) => a.id - b.id);
           
           setProductivityData({ performance: updatedPerformance });
         },
@@ -250,7 +286,6 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
         }
       });
     }
-    // Reset file input to allow re-uploading the same file
     if (event.target) {
         event.target.value = '';
     }
@@ -265,19 +300,15 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
     setProductivityData(prevData => {
       const newPerformance = prevData.performance.map(item => {
         if (item.id === id) {
-          return {
-            ...item,
-            name: '',
-            totalOrder: 0,
-            totalQty: 0,
-            status: 'GAGAL',
-          };
+          const initialItem = initialProductivityData.performance.find(p => p.id === id);
+          return initialItem ? initialItem : item;
         }
         return item;
       });
       return { ...prevData, performance: newPerformance };
     });
   };
+  
 
   const handleProductivityDeleteAll = () => {
     setProductivityData({ performance: [] });
@@ -291,6 +322,7 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
     hourlyBacklog,
     performanceData: { ...performanceData, totalPacked, averageHoursPacked },
     productivityData: productivityData,
+    productivityHoursData,
     isClient,
     isDialogOpen,
     setIsDialogOpen,
@@ -325,5 +357,3 @@ export const useAdmin = () => {
   }
   return context;
 };
- 
-    

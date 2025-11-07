@@ -7,6 +7,7 @@ import Backlog from '@/components/dashboard/backlog';
 import { useAdmin } from '@/hooks/use-admin';
 import ProductivityMenu from '@/components/dashboard/productivity-menu';
 import ProductivityDashboard from '@/components/dashboard/productivity-dashboard';
+import ProductivityHours from '@/components/dashboard/productivity-hours';
 
 type Metrics = {
   forecast: number;
@@ -15,7 +16,7 @@ type Metrics = {
 };
 
 export default function Home() {
-  const { metrics, backlogData, dailySummary, hourlyBacklog, performanceData, isClient, productivityData } = useAdmin();
+  const { metrics, backlogData, dailySummary, hourlyBacklog, performanceData, isClient, productivityData, productivityHoursData } = useAdmin();
 
   if (!isClient) {
     return null;
@@ -35,6 +36,7 @@ export default function Home() {
       <ProductivityMenu>
         <ProductivityDashboard data={productivityData} />
       </ProductivityMenu>
+      <ProductivityHours data={productivityHoursData} />
     </main>
   );
 }

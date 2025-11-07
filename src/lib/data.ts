@@ -85,6 +85,27 @@ export const initialProductivityData = {
   ]
 };
 
+export const initialProductivityHoursData = {
+  picker: {
+    jumlah: 0,
+    totalOrder: 0,
+    totalQuantity: 0,
+    byHours: 0,
+    targetOrder: 0,
+    targetQuantity: 0,
+    status: 'GAGAL',
+  },
+  packer: {
+    jumlah: 0,
+    totalOrder: 0,
+    totalQuantity: 0,
+    byHours: 0,
+    targetOrder: 0,
+    targetQuantity: 0,
+    status: 'GAGAL',
+  },
+};
+
 
 // Deprecated data, will be removed in future versions
 export const keyMetrics = { details: [], progress: 0 };
