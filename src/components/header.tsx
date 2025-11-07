@@ -17,10 +17,8 @@ export default function Header() {
         isDialogOpen, 
         setIsDialogOpen, 
         handleMetricsUpdate, 
-        handleBacklogUpdate,
         handleHourlyBacklogUpdate, 
         handlePerformanceUpdate,
-        backlogData,
         hourlyBacklog,
         performanceData,
         metrics,
@@ -46,10 +44,8 @@ export default function Header() {
             </DialogHeader>
             <AdminForm 
               onMetricsSubmit={handleMetricsUpdate} 
-              onBacklogSubmit={handleBacklogUpdate} 
               onHourlyBacklogSubmit={handleHourlyBacklogUpdate}
               onPerformanceSubmit={handlePerformanceUpdate}
-              backlogData={backlogData}
               hourlyData={hourlyBacklog}
               performanceData={performanceData}
               metrics={metrics}

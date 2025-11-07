@@ -1,12 +1,11 @@
 'use client';
 
 import { createContext, useContext, useState, useEffect, ReactNode, useMemo } from 'react';
-import { initialMetrics, initialBacklogData, initialDailySummary, initialHourlyBacklog, initialPerformanceData, initialProductivityData, initialProductivityHoursData } from '@/lib/data';
+import { initialMetrics, initialDailySummary, initialHourlyBacklog, initialPerformanceData, initialProductivityData, initialProductivityHoursData } from '@/lib/data';
 import Papa from 'papaparse';
 import { format } from 'date-fns';
 
 type Metrics = typeof initialMetrics;
-type BacklogData = typeof initialBacklogData;
 type DailySummaryData = typeof initialDailySummary;
 type HourlyBacklogData = typeof initialHourlyBacklog;
 type PerformanceData = Omit<typeof initialPerformanceData, 'averageHours'>;
@@ -38,7 +37,6 @@ const getFromLocalStorage = (key: string, initialValue: any) => {
 
 type AdminContextType = {
   metrics: Metrics & { totalPacked: number };
-  backlogData: BacklogData;
   dailySummary: DailySummaryData;
   hourlyBacklog: HourlyBacklogData;
   performanceData: PerformanceData & { totalPacked: number, averageHoursPacked: number };
@@ -52,7 +50,6 @@ type AdminContextType = {
   editingPerformance: PerformanceItem | null;
   setEditingPerformance: (item: PerformanceItem | null) => void;
   handleMetricsUpdate: (data: { forecast: number }) => void;
-  handleBacklogUpdate: (data: any) => void;
   handleHourlyBacklogUpdate: (data: { hourlyData: { hour: string; value: number }[] }) => void;
   handlePerformanceUpdate: (data: Partial<Omit<PerformanceData, 'totalPacked' | 'averageHoursPacked'>>) => void;
   handleProductivityUpdate: (data: PerformanceItem) => void;
@@ -72,7 +69,6 @@ const AdminContext = createContext<AdminContextType | undefined>(undefined);
 
 export const AdminProvider = ({ children }: { children: ReactNode }) => {
   const [metrics, setMetrics] = useState<Metrics>(() => getFromLocalStorage('metrics', initialMetrics));
-  const [backlogData, setBacklogData] = useState<BacklogData>(() => getFromLocalStorage('backlogData', initialBacklogData));
   const [dailySummary, setDailySummary] = useState<DailySummaryData>(() => getFromLocalStorage('dailySummary', initialDailySummary));
   const [hourlyBacklog, setHourlyBacklog] = useState<HourlyBacklogData>(() => getFromLocalStorage('hourlyBacklog', initialHourlyBacklog));
   const [performanceData, setPerformanceData] = useState<PerformanceData>(() => getFromLocalStorage('performanceData', initialPerformanceData));
@@ -177,7 +173,6 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
         }
 
         window.localStorage.setItem('metrics', JSON.stringify(newMetrics));
-        window.localStorage.setItem('backlogData', JSON.stringify(backlogData));
         window.localStorage.setItem('dailySummary', JSON.stringify(newDailySummary));
         window.localStorage.setItem('hourlyBacklog', JSON.stringify(hourlyBacklog));
         window.localStorage.setItem('performanceData', JSON.stringify(performanceData));
@@ -191,34 +186,13 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
         console.warn('Error writing to localStorage:', error);
       }
     }
-  }, [isClient, totalPacked, metrics, backlogData, dailySummary, hourlyBacklog, performanceData, productivityData, productivityDate, rowsPerPage, productivityHoursData]);
+  }, [isClient, totalPacked, metrics, dailySummary, hourlyBacklog, performanceData, productivityData, productivityDate, rowsPerPage, productivityHoursData]);
 
   const handleMetricsUpdate = (data: { forecast: number }) => {
     setMetrics((prevMetrics) => {
         const newMetrics = { ...prevMetrics, forecast: data.forecast, actual: totalPacked };
         newMetrics.fulfillmentRate = data.forecast > 0 ? (dailySummary.day1.actual / data.forecast) * 100 : 0;
         return newMetrics;
-    });
-    setIsDialogOpen(false);
-  };
-
-  const handleBacklogUpdate = (data: any) => {
-    setBacklogData(prevData => {
-      const newTypes = [...prevData.types];
-      const marketplaceData = newTypes[0];
-
-      const updateStatus = (status: 'paymentAccepted' | 'inProgress' | 'picked' | 'packed') => {
-        const order = data[status]?.order ?? marketplaceData.statuses[status].order;
-        const item = data[status]?.item ?? marketplaceData.statuses[status].item;
-        marketplaceData.statuses[status] = { order, item, avg: order > 0 ? item / order : 0 };
-      };
-
-      updateStatus('paymentAccepted');
-      updateStatus('inProgress');
-      updateStatus('picked');
-      updateStatus('packed');
-
-      return { ...prevData, types: newTypes };
     });
     setIsDialogOpen(false);
   };
@@ -358,7 +332,6 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
 
   const value = {
     metrics: { ...metrics, totalPacked },
-    backlogData,
     dailySummary,
     hourlyBacklog,
     performanceData: { ...performanceData, totalPacked, averageHoursPacked },
@@ -372,7 +345,6 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
     editingPerformance,
     setEditingPerformance,
     handleMetricsUpdate,
-    handleBacklogUpdate,
     handleHourlyBacklogUpdate,
     handlePerformanceUpdate,
     handleProductivityUpdate,

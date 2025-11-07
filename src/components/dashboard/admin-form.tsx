@@ -22,20 +22,6 @@ const metricsSchema = z.object({
 
 type MetricsFormValues = z.infer<typeof metricsSchema>;
 
-const statusSchema = z.object({
-  order: z.coerce.number().min(0),
-  item: z.coerce.number().min(0),
-});
-
-const backlogSchema = z.object({
-  paymentAccepted: statusSchema,
-  inProgress: statusSchema,
-  picked: statusSchema,
-  packed: statusSchema,
-});
-
-type BacklogFormValues = z.infer<typeof backlogSchema>;
-
 const hourlyBacklogSchema = z.object({
   hourlyData: z.array(z.object({
     hour: z.string(),
@@ -54,10 +40,8 @@ type PerformanceFormValues = z.infer<typeof performanceSchema>;
 
 type AdminFormProps = {
   onMetricsSubmit: (data: MetricsFormValues) => void;
-  onBacklogSubmit: (data: BacklogFormValues) => void;
   onHourlyBacklogSubmit: (data: HourlyBacklogFormValues) => void;
   onPerformanceSubmit: (data: PerformanceFormValues) => void;
-  backlogData: { types: { statuses: any }[] };
   hourlyData: { hour: string; value: number }[];
   performanceData: { picker: number; packer: number; };
   metrics: { forecast: number };
@@ -92,67 +76,6 @@ const MetricsForm = ({ onMetricsSubmit, metrics }: { onMetricsSubmit: (data: Met
     </Form>
   );
 };
-
-const BacklogForm = ({ onBacklogSubmit, backlogData }: { onBacklogSubmit: (data: BacklogFormValues) => void, backlogData: { types: { statuses: any }[] } }) => {
-  const defaultValues = backlogData?.types?.[0]?.statuses || {};
-  const form = useForm<BacklogFormValues>({
-    resolver: zodResolver(backlogSchema),
-    defaultValues: {
-      paymentAccepted: { order: defaultValues.paymentAccepted?.order || 0, item: defaultValues.paymentAccepted?.item || 0 },
-      inProgress: { order: defaultValues.inProgress?.order || 0, item: defaultValues.inProgress?.item || 0 },
-      picked: { order: defaultValues.picked?.order || 0, item: defaultValues.picked?.item || 0 },
-      packed: { order: defaultValues.packed?.order || 0, item: defaultValues.packed?.item || 0 },
-    },
-  });
-
-  const statuses = [
-    { name: 'paymentAccepted', label: 'Payment Accepted' },
-    { name: 'inProgress', label: 'In Progress' },
-    { name: 'picked', label: 'Picked' },
-    { name: 'packed', label: 'Packed' },
-  ] as const;
-
-  return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onBacklogSubmit)} className="space-y-6 pt-4">
-        {statuses.map(status => (
-          <div key={status.name} className="space-y-2 p-3 border rounded-md">
-            <h3 className="font-medium">{status.label}</h3>
-            <div className="grid grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name={`${status.name}.order`}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Order</FormLabel>
-                    <FormControl>
-                      <Input type="number" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name={`${status.name}.item`}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Item</FormLabel>
-                    <FormControl>
-                      <Input type="number" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-          </div>
-        ))}
-        <Button type="submit">Update Backlog</Button>
-      </form>
-    </Form>
-  );
-}
 
 const HourlyBacklogForm = ({ onHourlyBacklogSubmit, hourlyData }: { onHourlyBacklogSubmit: (data: HourlyBacklogFormValues) => void, hourlyData: { hour: string; value: number }[] }) => {
   const form = useForm<HourlyBacklogFormValues>({
@@ -241,20 +164,16 @@ const PerformanceForm = ({ onPerformanceSubmit, performanceData }: { onPerforman
 };
 
 
-export default function AdminForm({ onMetricsSubmit, onBacklogSubmit, onHourlyBacklogSubmit, onPerformanceSubmit, backlogData, hourlyData, performanceData, metrics }: AdminFormProps) {
+export default function AdminForm({ onMetricsSubmit, onHourlyBacklogSubmit, onPerformanceSubmit, hourlyData, performanceData, metrics }: AdminFormProps) {
   return (
     <Tabs defaultValue="metrics" className="w-full">
-      <TabsList className="grid w-full grid-cols-4">
+      <TabsList className="grid w-full grid-cols-3">
         <TabsTrigger value="metrics">Metrics</TabsTrigger>
-        <TabsTrigger value="backlog">Backlog</TabsTrigger>
         <TabsTrigger value="hourly">Hourly Backlog</TabsTrigger>
         <TabsTrigger value="performance">Kinerja</TabsTrigger>
       </TabsList>
       <TabsContent value="metrics">
         <MetricsForm onMetricsSubmit={onMetricsSubmit} metrics={metrics} />
-      </TabsContent>
-      <TabsContent value="backlog">
-        <BacklogForm onBacklogSubmit={onBacklogSubmit} backlogData={backlogData} />
       </TabsContent>
       <TabsContent value="hourly">
         <HourlyBacklogForm onHourlyBacklogSubmit={onHourlyBacklogSubmit} hourlyData={hourlyData} />
