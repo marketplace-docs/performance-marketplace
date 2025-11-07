@@ -76,7 +76,7 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
   const [dailySummary, setDailySummary] = useState<DailySummaryData>(() => getFromLocalStorage('dailySummary', initialDailySummary));
   const [hourlyBacklog, setHourlyBacklog] = useState<HourlyBacklogData>(() => getFromLocalStorage('hourlyBacklog', initialHourlyBacklog));
   const [performanceData, setPerformanceData] = useState<PerformanceData>(() => getFromLocalStorage('performanceData', initialPerformanceData));
-  const [productivityData, setProductivityData] = useState<ProductivityData>(() => getFromLocalStorage('productivityData', initialProductivityData));
+  const [productivityData, setProductivityData] = useState<ProductivityData>(() => getFromLocalStorage('productivityData', { performance: [] }));
   const [productivityHoursData, setProductivityHoursData] = useState<ProductivityHoursData>(() => getFromLocalStorage('productivityHoursData', initialProductivityHoursData));
 
   const [productivityDate, setProductivityDate] = useState<Date>(() => {
@@ -244,9 +244,9 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
                 const newItem = { ...item, ...updatedItem };
                 let targetOrder = 0;
                 if(newItem.job === 'Picker') {
-                  targetOrder = 420;
+                  targetOrder = 750;
                 } else if (newItem.job === 'Packer') {
-                  targetOrder = 385;
+                  targetOrder = 725;
                 }
                 newItem.status = newItem.totalOrder >= targetOrder ? 'BERHASIL' : 'GAGAL';
                 return newItem;
@@ -278,9 +278,9 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
           setProductivityData(prevData => {
             const currentPerformance = prevData.performance;
 
-            const newItems = uploadedData.map(row => {
+            const newItemsFromCSV = uploadedData.map(row => {
               const id = parseInt(row.id);
-              if(isNaN(id) || row.job !== jobType) return null;
+              if (isNaN(id) || row.job !== jobType) return null;
     
               const totalOrder = parseInt(row.totalOrder) || 0;
               const totalQty = parseInt(row.totalQty) || 0;
@@ -289,11 +289,11 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
               let targetQuantity = 0;
     
               if (jobType === 'Picker') {
-                targetOrder = 420;
+                targetOrder = 750;
                 targetQuantity = 1085;
               } else if (jobType === 'Packer') {
-                targetOrder = 385;
-                targetQuantity = 1050;
+                targetOrder = 725;
+                targetQuantity = 975;
               }
     
               const status = totalOrder >= targetOrder ? 'BERHASIL' : 'GAGAL';
@@ -309,12 +309,18 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
                 status
               }
             }).filter(Boolean) as PerformanceItem[];
-    
-            const otherJobTypeData = currentPerformance.filter(p => p.job !== jobType);
+
+            const existingItemsForJob = currentPerformance.filter(p => p.job === jobType);
+            const otherJobItems = currentPerformance.filter(p => p.job !== jobType);
+
+            const updatedItemsForJob = existingItemsForJob.map(existingItem => {
+              const newItem = newItemsFromCSV.find(up => up.id === existingItem.id);
+              return newItem || existingItem;
+            });
             
-            const updatedPerformance = [...otherJobTypeData, ...newItems].sort((a,b) => a.id - b.id);
+            const newPerformance = [...otherJobItems, ...updatedItemsForJob].sort((a,b) => a.id - b.id);
             
-            return { performance: updatedPerformance };
+            return { performance: newPerformance };
           });
         },
         error: (error: any) => {
@@ -337,7 +343,7 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
       const newPerformance = prevData.performance.map(item => {
         if (item.id === id) {
           const initialItem = initialProductivityData.performance.find(p => p.id === id);
-          return initialItem ? initialItem : item;
+          return initialItem ? { ...initialItem, name: "" } : item;
         }
         return item;
       });
