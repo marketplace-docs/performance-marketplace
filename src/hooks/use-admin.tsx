@@ -1,14 +1,13 @@
 'use client';
 
 import { createContext, useContext, useState, useEffect, ReactNode, useMemo } from 'react';
-import { initialMetrics, initialDailySummary, initialHourlyBacklog, initialPerformanceData, initialProductivityData, initialProductivityHoursData } from '@/lib/data';
+import { initialMetrics, initialDailySummary, initialHourlyBacklog, initialProductivityData, initialProductivityHoursData } from '@/lib/data';
 import Papa from 'papaparse';
 import { format } from 'date-fns';
 
 type Metrics = typeof initialMetrics;
 type DailySummaryData = typeof initialDailySummary;
 type HourlyBacklogData = typeof initialHourlyBacklog;
-type PerformanceData = Omit<typeof initialPerformanceData, 'averageHours'>;
 type ProductivityData = typeof initialProductivityData;
 type PerformanceItem = ProductivityData['performance'][0];
 type ProductivityHoursData = typeof initialProductivityHoursData;
@@ -39,7 +38,6 @@ type AdminContextType = {
   metrics: Metrics & { totalPacked: number };
   dailySummary: DailySummaryData;
   hourlyBacklog: HourlyBacklogData;
-  performanceData: PerformanceData & { totalPacked: number, averageHoursPacked: number };
   productivityData: ProductivityData;
   productivityHoursData: ProductivityHoursData;
   isClient: boolean;
@@ -51,7 +49,7 @@ type AdminContextType = {
   setEditingPerformance: (item: PerformanceItem | null) => void;
   handleMetricsUpdate: (data: { forecast: number }) => void;
   handleHourlyBacklogUpdate: (data: { hourlyData: { hour: string; value: number }[] }) => void;
-  handlePerformanceUpdate: (data: Partial<Omit<PerformanceData, 'totalPacked' | 'averageHoursPacked'>>) => void;
+  handlePerformanceUpdate: (data: any) => void;
   handleProductivityUpdate: (data: PerformanceItem) => void;
   handleFileUpload: (event: React.ChangeEvent<HTMLInputElement>) => void;
   handleProductivityReset: () => void;
@@ -71,7 +69,6 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
   const [metrics, setMetrics] = useState<Metrics>(() => getFromLocalStorage('metrics', initialMetrics));
   const [dailySummary, setDailySummary] = useState<DailySummaryData>(() => getFromLocalStorage('dailySummary', initialDailySummary));
   const [hourlyBacklog, setHourlyBacklog] = useState<HourlyBacklogData>(() => getFromLocalStorage('hourlyBacklog', initialHourlyBacklog));
-  const [performanceData, setPerformanceData] = useState<PerformanceData>(() => getFromLocalStorage('performanceData', initialPerformanceData));
   const [productivityData, setProductivityData] = useState<ProductivityData>(() => getFromLocalStorage('productivityData', { performance: [] }));
   const [productivityHoursData, setProductivityHoursData] = useState<ProductivityHoursData>(() => getFromLocalStorage('productivityHoursData', initialProductivityHoursData));
 
@@ -93,11 +90,9 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
     setIsClient(true);
   }, []);
 
-  const { totalPacked, averageHoursPacked } = useMemo(() => {
+  const { totalPacked } = useMemo(() => {
     const total = hourlyBacklog.reduce((sum, item) => sum + item.value, 0);
-    const activeHours = hourlyBacklog.filter(item => item.value > 0).length;
-    const average = activeHours > 0 ? total / activeHours : 0;
-    return { totalPacked: total, averageHoursPacked: Math.round(average) };
+    return { totalPacked: total };
   }, [hourlyBacklog]);
   
   useEffect(() => {
@@ -113,7 +108,7 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
     const pickerTotalQty = pickers.reduce((sum, p) => sum + p.totalQty, 0);
     const pickerTargetOrder = 750;
     const pickerTargetQty = 1085;
-    const pickerTargetEndShiftOrder = pickerTargetOrder;
+    const pickerTargetEndShiftOrder = pickerTargetOrder * workingHours;
     
     newHoursData.picker = {
         jumlah: pickerCount,
@@ -123,10 +118,10 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
         averageQuantityHours: pickerCount > 0 ? Math.round(pickerTotalQty / pickerCount) : 0,
         targetOrder: pickerTargetOrder,
         targetQuantity: pickerTargetQty,
-        targetEndShiftOrder: pickerTargetEndShiftOrder * workingHours,
+        targetEndShiftOrder: pickerTargetEndShiftOrder,
         targetEndShiftQuantity: pickerTargetQty * workingHours,
-        status: pickerTotalOrder >= pickerTargetEndShiftOrder * workingHours ? 'BERHASIL' : 'GAGAL',
-        progress: pickerTargetEndShiftOrder > 0 ? (pickerTotalOrder / (pickerTargetEndShiftOrder * workingHours)) * 100 : 0,
+        status: pickerTotalOrder >= pickerTargetEndShiftOrder ? 'BERHASIL' : 'GAGAL',
+        progress: pickerTargetEndShiftOrder > 0 ? (pickerTotalOrder / pickerTargetEndShiftOrder) * 100 : 0,
     };
     
     const packerCount = packers.filter(p => p.name).length;
@@ -134,7 +129,7 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
     const packerTotalQty = packers.reduce((sum, p) => sum + p.totalQty, 0);
     const packerTargetOrder = 725;
     const packerTargetQty = 975;
-    const packerTargetEndShiftOrder = packerTargetOrder;
+    const packerTargetEndShiftOrder = packerTargetOrder * workingHours;
 
     newHoursData.packer = {
       jumlah: packerCount,
@@ -144,10 +139,10 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
       averageQuantityHours: packerCount > 0 ? Math.round(packerTotalQty / packerCount) : 0,
       targetOrder: packerTargetOrder,
       targetQuantity: packerTargetQty,
-      targetEndShiftOrder: packerTargetEndShiftOrder * workingHours,
+      targetEndShiftOrder: packerTargetEndShiftOrder,
       targetEndShiftQuantity: packerTargetQty * workingHours,
-      status: packerTotalOrder >= packerTargetEndShiftOrder * workingHours ? 'BERHASIL' : 'GAGAL',
-      progress: packerTargetEndShiftOrder > 0 ? (packerTotalOrder / (packerTargetEndShiftOrder * workingHours)) * 100 : 0,
+      status: packerTotalOrder >= packerTargetEndShiftOrder ? 'BERHASIL' : 'GAGAL',
+      progress: packerTargetEndShiftOrder > 0 ? (packerTotalOrder / packerTargetEndShiftOrder) * 100 : 0,
     };
 
     setProductivityHoursData(newHoursData);
@@ -175,7 +170,6 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
         window.localStorage.setItem('metrics', JSON.stringify(newMetrics));
         window.localStorage.setItem('dailySummary', JSON.stringify(newDailySummary));
         window.localStorage.setItem('hourlyBacklog', JSON.stringify(hourlyBacklog));
-        window.localStorage.setItem('performanceData', JSON.stringify(performanceData));
         window.localStorage.setItem('productivityData', JSON.stringify(productivityData));
         window.localStorage.setItem('productivityDate', JSON.stringify(productivityDate));
         window.localStorage.setItem('rowsPerPage', JSON.stringify(rowsPerPage));
@@ -186,7 +180,7 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
         console.warn('Error writing to localStorage:', error);
       }
     }
-  }, [isClient, totalPacked, metrics, dailySummary, hourlyBacklog, performanceData, productivityData, productivityDate, rowsPerPage, productivityHoursData]);
+  }, [isClient, totalPacked, metrics, dailySummary, hourlyBacklog, productivityData, productivityDate, rowsPerPage, productivityHoursData]);
 
   const handleMetricsUpdate = (data: { forecast: number }) => {
     setMetrics((prevMetrics) => {
@@ -202,11 +196,8 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
     setIsDialogOpen(false);
   };
 
-  const handlePerformanceUpdate = (data: Partial<Omit<PerformanceData, 'totalPacked' | 'averageHoursPacked'>>) => {
-    setPerformanceData(prevData => ({
-      ...prevData,
-      ...data,
-    }));
+  const handlePerformanceUpdate = (data: any) => {
+    // This function is now empty as performanceData is removed
     setIsDialogOpen(false);
   };
 
@@ -334,7 +325,6 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
     metrics: { ...metrics, totalPacked },
     dailySummary,
     hourlyBacklog,
-    performanceData: { ...performanceData, totalPacked, averageHoursPacked },
     productivityData: productivityData,
     productivityHoursData,
     isClient,

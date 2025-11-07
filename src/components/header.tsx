@@ -20,7 +20,6 @@ export default function Header() {
         handleHourlyBacklogUpdate, 
         handlePerformanceUpdate,
         hourlyBacklog,
-        performanceData,
         metrics,
         isProductivityFormOpen,
         setIsProductivityFormOpen,
@@ -47,7 +46,6 @@ export default function Header() {
               onHourlyBacklogSubmit={handleHourlyBacklogUpdate}
               onPerformanceSubmit={handlePerformanceUpdate}
               hourlyData={hourlyBacklog}
-              performanceData={performanceData}
               metrics={metrics}
             />
           </DialogContent>

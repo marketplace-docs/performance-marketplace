@@ -167,19 +167,15 @@ const PerformanceForm = ({ onPerformanceSubmit, performanceData }: { onPerforman
 export default function AdminForm({ onMetricsSubmit, onHourlyBacklogSubmit, onPerformanceSubmit, hourlyData, performanceData, metrics }: AdminFormProps) {
   return (
     <Tabs defaultValue="metrics" className="w-full">
-      <TabsList className="grid w-full grid-cols-3">
+      <TabsList className="grid w-full grid-cols-2">
         <TabsTrigger value="metrics">Metrics</TabsTrigger>
         <TabsTrigger value="hourly">Hourly Backlog</TabsTrigger>
-        <TabsTrigger value="performance">Kinerja</TabsTrigger>
       </TabsList>
       <TabsContent value="metrics">
         <MetricsForm onMetricsSubmit={onMetricsSubmit} metrics={metrics} />
       </TabsContent>
       <TabsContent value="hourly">
         <HourlyBacklogForm onHourlyBacklogSubmit={onHourlyBacklogSubmit} hourlyData={hourlyData} />
-      </TabsContent>
-      <TabsContent value="performance">
-        <PerformanceForm onPerformanceSubmit={onPerformanceSubmit} performanceData={performanceData} />
       </TabsContent>
     </Tabs>
   );

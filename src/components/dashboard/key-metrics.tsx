@@ -35,7 +35,6 @@ export default function KeyMetrics({ metrics }: KeyMetricsProps) {
         <MetricItem label="Actual Order" value={metrics.actual.toLocaleString()} />
         <MetricItem label="Fulfillment Rate" value={metrics.fulfillmentRate} isPercentage />
       </div>
-      <PerformanceSummary data={{ totalPacked: metrics.totalPacked }} />
     </div>
   );
 }
