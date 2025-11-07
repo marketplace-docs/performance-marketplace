@@ -1,5 +1,6 @@
 'use client';
 
+import React from 'react';
 import {
   Card,
   CardContent,
@@ -19,7 +20,6 @@ import { ThumbsUp, ThumbsDown, Pencil, Upload, Download, ChevronLeft, ChevronRig
 import { cn } from '@/lib/utils';
 import { Button } from '../ui/button';
 import { useAdmin } from '@/hooks/use-admin';
-import React from 'react';
 import {
   Select,
   SelectContent,
@@ -41,7 +41,7 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
 import { Calendar } from '../ui/calendar';
 import { format } from 'date-fns';
-
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 type PerformanceData = {
   id: number;
@@ -59,6 +59,79 @@ type ProductivityDashboardProps = {
     performance: PerformanceData[];
   };
 };
+
+const PerformanceTable = ({
+  items,
+  startIndex,
+  handleEditClick,
+  handleProductivityDelete,
+}: {
+  items: PerformanceData[];
+  startIndex: number;
+  handleEditClick: (item: PerformanceData) => void;
+  handleProductivityDelete: (id: number) => void;
+}) => (
+  <div className="mt-4 border rounded-lg overflow-x-auto">
+    <Table>
+      <TableHeader>
+        <TableRow>
+          <TableHead>NO</TableHead>
+          <TableHead>NAME</TableHead>
+          <TableHead>TOTAL ORDER</TableHead>
+          <TableHead>TOTAL QTY</TableHead>
+          <TableHead>TARGET ORDER</TableHead>
+          <TableHead>TARGET QTY</TableHead>
+          <TableHead>STATUS</TableHead>
+          <TableHead>ACTION</TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {items.map((item, index) => (
+          <TableRow key={item.id}>
+            <TableCell>{startIndex + index + 1}</TableCell>
+            <TableCell>{item.name || '-'}</TableCell>
+            <TableCell>{item.totalOrder.toLocaleString()}</TableCell>
+            <TableCell>{item.totalQty.toLocaleString()}</TableCell>
+            <TableCell className="text-destructive font-bold">{item.targetOrder.toLocaleString()}</TableCell>
+            <TableCell className="text-destructive font-bold">{item.targetQuantity.toLocaleString()}</TableCell>
+            <TableCell>
+              <Badge className={cn("text-center font-bold", item.status === "GAGAL" ? "bg-yellow-400 text-black hover:bg-yellow-500" : "bg-green-500 hover:bg-green-600")}>
+                <div className="flex items-center justify-center gap-1">
+                  <span>{item.status}</span>
+                  {item.status === "GAGAL" ? <ThumbsDown className="h-4 w-4" /> : <ThumbsUp className="h-4 w-4" />}
+                </div>
+              </Badge>
+            </TableCell>
+            <TableCell className="flex gap-2">
+              <Button variant="outline" size="icon" onClick={() => handleEditClick(item)}>
+                <Pencil className='h-4 w-4' />
+              </Button>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="destructive" size="icon">
+                    <Trash2 className='h-4 w-4' />
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Are you sure you want to delete this entry?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      This will reset the data for {item.name || `entry ${item.id}`}. You can re-enter the data manually or via CSV upload.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction onClick={() => handleProductivityDelete(item.id)}>Delete</AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            </TableCell>
+          </TableRow>
+        ))}
+      </TableBody>
+    </Table>
+  </div>
+);
 
 export default function ProductivityDashboard({ data }: ProductivityDashboardProps) {
   const { 
@@ -108,11 +181,18 @@ export default function ProductivityDashboard({ data }: ProductivityDashboardPro
   
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
-  // Pagination logic
-  const totalPages = Math.ceil(data.performance.length / rowsPerPage);
+  const pickers = data.performance.filter(p => p.job === 'Picker');
+  const packers = data.performance.filter(p => p.job === 'Packer');
+
+  const totalPages = Math.ceil(Math.max(pickers.length, packers.length) / rowsPerPage);
   const startIndex = (currentPage - 1) * rowsPerPage;
-  const endIndex = startIndex + rowsPerPage;
-  const currentItems = data.performance.slice(startIndex, endIndex);
+  
+  const currentPickers = pickers.slice(startIndex, startIndex + rowsPerPage);
+  const currentPackers = packers.slice(startIndex, startIndex + rowsPerPage);
+
+  const onTabChange = () => {
+    setCurrentPage(1);
+  }
 
   return (
     <Card className="w-full">
@@ -195,68 +275,28 @@ export default function ProductivityDashboard({ data }: ProductivityDashboardPro
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="mt-4 border rounded-lg overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>NO</TableHead>
-                  <TableHead>NAME</TableHead>
-                  <TableHead>JOB</TableHead>
-                  <TableHead>TOTAL ORDER</TableHead>
-                  <TableHead>TOTAL QTY</TableHead>
-                  <TableHead>TARGET ORDER</TableHead>
-                  <TableHead>TARGET QTY</TableHead>
-                  <TableHead>STATUS</TableHead>
-                  <TableHead>ACTION</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {currentItems.map((item, index) => (
-                  <TableRow key={item.id}>
-                    <TableCell>{startIndex + index + 1}</TableCell>
-                    <TableCell>{item.name || '-'}</TableCell>
-                    <TableCell>{item.job}</TableCell>
-                    <TableCell>{item.totalOrder.toLocaleString()}</TableCell>
-                    <TableCell>{item.totalQty.toLocaleString()}</TableCell>
-                    <TableCell className="text-destructive font-bold">{item.targetOrder.toLocaleString()}</TableCell>
-                    <TableCell className="text-destructive font-bold">{item.targetQuantity.toLocaleString()}</TableCell>
-                    <TableCell>
-                      <Badge className={cn("text-center font-bold", item.status === "GAGAL" ? "bg-yellow-400 text-black hover:bg-yellow-500" : "bg-green-500 hover:bg-green-600")}>
-                        <div className="flex items-center justify-center gap-1">
-                          <span>{item.status}</span>
-                          {item.status === "GAGAL" ? <ThumbsDown className="h-4 w-4" /> : <ThumbsUp className="h-4 w-4" />}
-                        </div>
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="flex gap-2">
-                      <Button variant="outline" size="icon" onClick={() => handleEditClick(item)}>
-                        <Pencil className='h-4 w-4' />
-                      </Button>
-                      <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                          <Button variant="destructive" size="icon">
-                            <Trash2 className='h-4 w-4' />
-                          </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>Are you sure you want to delete this entry?</AlertDialogTitle>
-                            <AlertDialogDescription>
-                              This will reset the data for {item.name || `entry ${item.id}`}. You can re-enter the data manually or via CSV upload.
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel>Cancel</AlertDialogCancel>
-                            <AlertDialogAction onClick={() => handleProductivityDelete(item.id)}>Delete</AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-        </div>
+        <Tabs defaultValue="picker" className="w-full" onValueChange={onTabChange}>
+            <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="picker">Picker</TabsTrigger>
+                <TabsTrigger value="packer">Packer</TabsTrigger>
+            </TabsList>
+            <TabsContent value="picker">
+                <PerformanceTable 
+                    items={currentPickers} 
+                    startIndex={startIndex}
+                    handleEditClick={handleEditClick}
+                    handleProductivityDelete={handleProductivityDelete}
+                />
+            </TabsContent>
+            <TabsContent value="packer">
+                <PerformanceTable 
+                    items={currentPackers} 
+                    startIndex={startIndex}
+                    handleEditClick={handleEditClick}
+                    handleProductivityDelete={handleProductivityDelete}
+                />
+            </TabsContent>
+        </Tabs>
         <div className="flex items-center justify-between mt-4">
             <div className="flex items-center gap-2">
                 <span className="text-sm text-muted-foreground">Rows per page:</span>
