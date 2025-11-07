@@ -278,7 +278,7 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
     dailySummary,
     hourlyBacklog,
     performanceData: { ...performanceData, totalPacked, averageHoursPacked },
-    productivityData,
+    productivityData: productivityData || { performance: [] },
     isClient,
     isDialogOpen,
     setIsDialogOpen,
@@ -313,3 +313,4 @@ export const useAdmin = () => {
   }
   return context;
 };
+ 
