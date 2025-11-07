@@ -42,7 +42,12 @@ const formatNumber = (num: number) => {
     if (Number.isInteger(num)) {
         return num.toLocaleString();
     }
-    return num.toFixed(2).toLocaleString();
+    const fixedNum = num.toFixed(2);
+    // If the number is like 12.00, show 12.
+    if (fixedNum.endsWith('.00')) {
+        return parseInt(fixedNum).toLocaleString();
+    }
+    return parseFloat(fixedNum).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
 

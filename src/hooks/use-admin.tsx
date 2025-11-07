@@ -21,6 +21,10 @@ const getFromLocalStorage = (key: string, initialValue: any) => {
   }
   try {
     const item = window.localStorage.getItem(key);
+    // When resetting, the value might be an empty array which is valid.
+    if (item === "{\"performance\":[]}") {
+        return { performance: [] };
+    }
     return item ? JSON.parse(item) : initialValue;
   } catch (error) {
     console.warn(`Error reading localStorage key “${key}”:`, error);
@@ -98,26 +102,42 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
   
   useEffect(() => {
     const newHoursData = { ...initialProductivityHoursData };
+    const performance = productivityData.performance || [];
     
-    const pickers = productivityData.performance.filter(p => p.job === 'Picker');
-    const packers = productivityData.performance.filter(p => p.job === 'Packer');
+    const pickers = performance.filter(p => p.job === 'Picker');
+    const packers = performance.filter(p => p.job === 'Packer');
+    
+    const pickerCount = pickers.filter(p => p.name).length;
+    const pickerTotalOrder = pickers.reduce((sum, p) => sum + p.totalOrder, 0);
+    const pickerTotalQty = pickers.reduce((sum, p) => sum + p.totalQty, 0);
+    const pickerTargetOrder = 45 * pickerCount;
+    const pickerTargetQty = 105 * pickerCount;
+    
+    newHoursData.picker = {
+        jumlah: pickerCount,
+        totalOrder: pickerTotalOrder,
+        totalQuantity: pickerTotalQty,
+        byHours: pickerCount > 0 ? pickerTotalOrder / pickerCount : 0,
+        targetOrder: pickerTargetOrder,
+        targetQuantity: pickerTargetQty,
+        status: pickerTotalOrder >= pickerTargetOrder ? 'BERHASIL' : 'GAGAL',
+    };
+    
+    const packerCount = packers.filter(p => p.name).length;
+    const packerTotalOrder = packers.reduce((sum, p) => sum + p.totalOrder, 0);
+    const packerTotalQty = packers.reduce((sum, p) => sum + p.totalQty, 0);
+    const packerTargetOrder = 45 * packerCount;
+    const packerTargetQty = 90 * packerCount;
 
-    newHoursData.picker.jumlah = pickers.filter(p => p.name).length;
-    newHoursData.picker.totalOrder = pickers.reduce((sum, p) => sum + p.totalOrder, 0);
-    newHoursData.picker.totalQuantity = pickers.reduce((sum, p) => sum + p.totalQty, 0);
-    newHoursData.picker.targetOrder = pickers.reduce((sum, p) => sum + p.targetOrder, 0);
-    newHoursData.picker.targetQuantity = pickers.reduce((sum, p) => sum + p.targetQuantity, 0);
-    newHoursData.picker.byHours = newHoursData.picker.jumlah > 0 ? newHoursData.picker.totalOrder / newHoursData.picker.jumlah : 0;
-    newHoursData.picker.status = newHoursData.picker.totalOrder >= newHoursData.picker.targetOrder ? 'BERHASIL' : 'GAGAL';
-
-
-    newHoursData.packer.jumlah = packers.filter(p => p.name).length;
-    newHoursData.packer.totalOrder = packers.reduce((sum, p) => sum + p.totalOrder, 0);
-    newHoursData.packer.totalQuantity = packers.reduce((sum, p) => sum + p.totalQty, 0);
-    newHoursData.packer.targetOrder = packers.reduce((sum, p) => sum + p.targetOrder, 0);
-    newHoursData.packer.targetQuantity = packers.reduce((sum, p) => sum + p.targetQuantity, 0);
-    newHoursData.packer.byHours = newHoursData.packer.jumlah > 0 ? newHoursData.packer.totalOrder / newHoursData.packer.jumlah : 0;
-    newHoursData.packer.status = newHoursData.packer.totalOrder >= newHoursData.packer.targetOrder ? 'BERHASIL' : 'GAGAL';
+    newHoursData.packer = {
+      jumlah: packerCount,
+      totalOrder: packerTotalOrder,
+      totalQuantity: packerTotalQty,
+      byHours: packerCount > 0 ? packerTotalOrder / packerCount : 0,
+      targetOrder: packerTargetOrder,
+      targetQuantity: packerTargetQty,
+      status: packerTotalOrder >= packerTargetOrder ? 'BERHASIL' : 'GAGAL',
+    };
 
     setProductivityHoursData(newHoursData);
 
@@ -234,7 +254,7 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
             return;
           }
   
-          const currentPerformance = getFromLocalStorage('productivityData', initialProductivityData).performance;
+          const currentPerformance = (getFromLocalStorage('productivityData', initialProductivityData) as ProductivityData).performance;
   
           const newItems = uploadedData.map(row => {
             const id = parseInt(row.id);
@@ -270,14 +290,14 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
   
   
           const otherJobTypeData = currentPerformance.filter(p => p.job !== jobType);
-          const existingTemplateData = initialProductivityData.performance.filter(p => p.job === jobType);
+          const existingTemplateDataForJob = initialProductivityData.performance.filter(p => p.job === jobType);
 
-          const finalData = existingTemplateData.map(templateItem => {
+          const finalDataForJob = existingTemplateDataForJob.map(templateItem => {
               const uploadedItem = newItems.find(newItem => newItem.id === templateItem.id);
               return uploadedItem || templateItem;
           });
 
-          const updatedPerformance = [...otherJobTypeData, ...finalData].sort((a,b) => a.id - b.id);
+          const updatedPerformance = [...otherJobTypeData, ...finalDataForJob].sort((a,b) => a.id - b.id);
           
           setProductivityData({ performance: updatedPerformance });
         },
