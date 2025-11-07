@@ -48,6 +48,7 @@ type AdminContextType = {
   handleFileUpload: (event: React.ChangeEvent<HTMLInputElement>) => void;
   handleProductivityReset: () => void;
   handleProductivityDelete: (id: number) => void;
+  handleProductivityDeleteAll: () => void;
   currentPage: number;
   setCurrentPage: (page: number) => void;
   rowsPerPage: number;
@@ -190,28 +191,48 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
         skipEmptyLines: true,
         complete: (results) => {
           const uploadedData = results.data as any[];
-          setProductivityData(prevData => {
-            const newPerformance = prevData.performance.map(item => {
-              const found = uploadedData.find(row => parseInt(row.id) === item.id);
-              if (found) {
-                const totalOrder = parseInt(found.totalOrder) || item.totalOrder;
-                const totalQty = parseInt(found.totalQty) || item.totalQty;
-                const targetOrder = parseInt(found.targetOrder) || item.targetOrder;
-                
-                const updatedItem = {
-                  ...item,
-                  name: found.name || item.name,
-                  job: found.job || item.job,
-                  totalOrder,
-                  totalQty,
-                };
-                updatedItem.status = totalOrder >= targetOrder ? 'BERHASIL' : 'GAGAL';
-                return updatedItem;
-              }
-              return item;
-            });
-            return { ...prevData, performance: newPerformance };
-          });
+          
+          let updatedPerformance = [...(getFromLocalStorage('productivityData', initialProductivityData).performance)];
+
+          const newItems = uploadedData.map(row => {
+            const id = parseInt(row.id);
+            if(isNaN(id)) return null;
+
+            const totalOrder = parseInt(row.totalOrder) || 0;
+            const totalQty = parseInt(row.totalQty) || 0;
+            const job = row.job || 'Picker';
+            let targetOrder = 0;
+            let targetQuantity = 0;
+
+            if (job === 'Picker') {
+              targetOrder = 420;
+              targetQuantity = 1085;
+            } else if (job === 'Packer') {
+              targetOrder = 385;
+              targetQuantity = 1050;
+            }
+
+            const status = totalOrder >= targetOrder ? 'BERHASIL' : 'GAGAL';
+
+            return {
+              id,
+              name: row.name || '',
+              job,
+              totalOrder,
+              totalQty,
+              targetOrder,
+              targetQuantity,
+              status
+            }
+          }).filter(Boolean) as PerformanceItem[];
+
+          
+          const itemIds = new Set(newItems.map(i => i.id));
+          updatedPerformance = updatedPerformance.filter(p => !itemIds.has(p.id));
+          updatedPerformance.push(...newItems);
+          updatedPerformance.sort((a, b) => a.id - b.id);
+          
+          setProductivityData({ performance: updatedPerformance });
         },
         error: (error: any) => {
           console.error("Error parsing CSV:", error);
@@ -246,6 +267,11 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
     });
   };
 
+  const handleProductivityDeleteAll = () => {
+    setProductivityData({ performance: [] });
+    setCurrentPage(1);
+  };
+
   const value = {
     metrics,
     backlogData,
@@ -268,6 +294,7 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
     handleFileUpload,
     handleProductivityReset,
     handleProductivityDelete,
+    handleProductivityDeleteAll,
     currentPage,
     setCurrentPage,
     rowsPerPage,

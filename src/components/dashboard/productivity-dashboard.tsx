@@ -15,7 +15,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { ThumbsUp, ThumbsDown, Pencil, Upload, Download, ChevronLeft, ChevronRight, RefreshCcw, Trash2, CalendarIcon } from 'lucide-react';
+import { ThumbsUp, ThumbsDown, Pencil, Upload, Download, ChevronLeft, ChevronRight, RefreshCcw, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '../ui/button';
 import { useAdmin } from '@/hooks/use-admin';
@@ -71,6 +71,7 @@ export default function ProductivityDashboard({ data }: ProductivityDashboardPro
     handleFileUpload,
     handleProductivityReset,
     handleProductivityDelete,
+    handleProductivityDeleteAll,
     productivityDate,
     setProductivityDate,
   } = useAdmin();
@@ -116,7 +117,7 @@ export default function ProductivityDashboard({ data }: ProductivityDashboardPro
   return (
     <Card className="w-full">
       <CardHeader>
-        <div className="flex gap-2 pb-4">
+        <div className="flex flex-wrap gap-2 pb-4">
             <Button onClick={() => fileInputRef.current?.click()}>
                 <Upload className="mr-2" />
                 Upload CSV
@@ -150,6 +151,26 @@ export default function ProductivityDashboard({ data }: ProductivityDashboardPro
                 <AlertDialogFooter>
                   <AlertDialogCancel>Cancel</AlertDialogCancel>
                   <AlertDialogAction onClick={handleProductivityReset}>Continue</AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="destructive">
+                  <Trash2 className="mr-2" />
+                  Delete All
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Are you sure you want to delete all data?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This action will permanently delete all performance entries. This cannot be undone.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleProductivityDeleteAll}>Delete All</AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>
             </AlertDialog>
