@@ -103,7 +103,7 @@ export default function ProductivityHours({ data }: ProductivityHoursProps) {
               <TableHeader>
                 <TableRow>
                   <TableHead>Role</TableHead>
-                  <TableHead>Jumlah</TableHead>
+                  <TableHead>Manpower</TableHead>
                   <TableHead>Total Order</TableHead>
                   <TableHead>Total Quantity</TableHead>
                   <TableHead>Avg Order Hours</TableHead>
