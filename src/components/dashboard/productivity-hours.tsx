@@ -101,8 +101,8 @@ export default function ProductivityHours({ data }: ProductivityHoursProps) {
                   <TableHead>Total Order</TableHead>
                   <TableHead>Total Quantity</TableHead>
                   <TableHead>Hours</TableHead>
-                  <TableHead>Target Order</TableHead>
-                  <TableHead>Target Quantity</TableHead>
+                  <TableHead>Target Order Hours</TableHead>
+                  <TableHead>Target Quantity Hours</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Progress</TableHead>
                 </TableRow>
