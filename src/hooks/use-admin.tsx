@@ -3,6 +3,7 @@
 import { createContext, useContext, useState, useEffect, ReactNode, useMemo } from 'react';
 import { initialMetrics, initialBacklogData, initialDailySummary, initialHourlyBacklog, initialPerformanceData, initialProductivityData } from '@/lib/data';
 import Papa from 'papaparse';
+import { format } from 'date-fns';
 
 type Metrics = typeof initialMetrics;
 type BacklogData = typeof initialBacklogData;
@@ -61,7 +62,11 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
   const [dailySummary, setDailySummary] = useState<DailySummaryData>(() => getFromLocalStorage('dailySummary', initialDailySummary));
   const [hourlyBacklog, setHourlyBacklog] = useState<HourlyBacklogData>(() => getFromLocalStorage('hourlyBacklog', initialHourlyBacklog));
   const [performanceData, setPerformanceData] = useState<PerformanceData>(() => getFromLocalStorage('performanceData', initialPerformanceData));
-  const [productivityData, setProductivityData] = useState<ProductivityData>(() => getFromLocalStorage('productivityData', initialProductivityData));
+  const [productivityData, setProductivityData] = useState<ProductivityData>(() => {
+    const savedData = getFromLocalStorage('productivityData', initialProductivityData);
+    const currentDate = format(new Date(), 'd MMMM yyyy').toUpperCase();
+    return { ...savedData, date: currentDate };
+  });
 
   const [isClient, setIsClient] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -73,6 +78,8 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     setIsClient(true);
+    const currentDate = format(new Date(), 'd MMMM yyyy').toUpperCase();
+    setProductivityData(prevData => ({ ...prevData, date: currentDate }));
   }, []);
 
   const { totalPacked, averageHoursPacked } = useMemo(() => {
@@ -212,7 +219,11 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
   };
   
   const handleProductivityReset = () => {
-    setProductivityData(initialProductivityData);
+    setProductivityData(prevData => ({
+      ...initialProductivityData,
+      date: prevData.date, // Keep the current date
+      performance: initialProductivityData.performance.map(p => ({ ...p, name: "", totalOrder: 0, totalQty: 0, status: "GAGAL" }))
+    }));
     setCurrentPage(1);
   };
 
@@ -220,7 +231,6 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
     setProductivityData(prevData => {
       const newPerformance = prevData.performance.map(item => {
         if (item.id === id) {
-          const initialItem = initialProductivityData.performance.find(p => p.id === id) || item;
           return {
             ...item,
             name: '',
@@ -273,3 +283,5 @@ export const useAdmin = () => {
   }
   return context;
 };
+
+    
