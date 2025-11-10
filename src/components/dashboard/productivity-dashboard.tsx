@@ -152,9 +152,7 @@ export default function ProductivityDashboard({ data }: ProductivityDashboardPro
     rowsPerPage,
     setRowsPerPage,
     handleFileUpload,
-    handleProductivityReset,
     handleProductivityDelete,
-    handleProductivityDeleteAll,
     productivityDate,
     setProductivityDate,
   } = useAdmin();
@@ -229,47 +227,6 @@ export default function ProductivityDashboard({ data }: ProductivityDashboardPro
                 <Download className="mr-2" />
                 Template Packer
             </Button>
-             <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button variant="outline">
-                  <RefreshCcw className="mr-2" />
-                  Reset Data
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    This action will reset all performance data to its initial state.
-                    This will restore the default empty rows.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction onClick={handleProductivityReset}>Continue</AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button variant="destructive">
-                  <Trash2 className="mr-2" />
-                  Delete All
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Are you sure you want to delete all data?</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    This action will permanently delete all performance entries. This cannot be undone.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction onClick={handleProductivityDeleteAll}>Delete All</AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
         </div>
         <CardTitle className="relative text-xl font-bold text-center p-2 bg-destructive text-destructive-foreground rounded-lg">
           MARKETPLACE PERFORMANCE, {format(productivityDate, 'd MMMM yyyy').toUpperCase()}

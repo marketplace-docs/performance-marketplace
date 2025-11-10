@@ -60,6 +60,8 @@ type AdminContextType = {
   handleProductivityDeleteAll: () => void;
   handleOrderStatusUpload: (event: React.ChangeEvent<HTMLInputElement>) => void;
   handleOrderStatusTemplateExport: () => void;
+  handleBacklogReset: () => void;
+  handleHourlyStatusReset: () => void;
   currentPage: number;
   setCurrentPage: (page: number) => void;
   rowsPerPage: number;
@@ -408,6 +410,14 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
     link.click();
     document.body.removeChild(link);
   };
+  
+  const handleBacklogReset = () => {
+    setHourlyBacklog(initialHourlyBacklog);
+  };
+
+  const handleHourlyStatusReset = () => {
+    setHourlyOrderStatusData(initialHourlyOrderStatusData);
+  };
 
 
   const value = {
@@ -434,6 +444,8 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
     handleProductivityDeleteAll,
     handleOrderStatusUpload,
     handleOrderStatusTemplateExport,
+    handleBacklogReset,
+    handleHourlyStatusReset,
     currentPage,
     setCurrentPage,
     rowsPerPage,

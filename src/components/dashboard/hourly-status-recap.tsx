@@ -8,7 +8,19 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Button } from '../ui/button';
-import { ChevronDown, ChevronUp } from 'lucide-react';
+import { ChevronDown, ChevronUp, RefreshCcw } from 'lucide-react';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
+import { useAdmin } from '@/hooks/use-admin';
 
 type HourlyStatus = {
   hour: string;
@@ -44,6 +56,7 @@ const statusDisplayMapping: { key: keyof Omit<HourlyStatus, 'hour'>; label: stri
 
 export default function HourlyStatusRecap({ data }: HourlyStatusRecapProps) {
     const [isOpen, setIsOpen] = useState(false);
+    const { handleHourlyStatusReset } = useAdmin();
 
     if (!data || data.length === 0) {
         return (
@@ -70,9 +83,30 @@ export default function HourlyStatusRecap({ data }: HourlyStatusRecapProps) {
     <Card>
         <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle>Hourly Update Status</CardTitle>
-            <Button variant="outline" size="icon" onClick={() => setIsOpen(!isOpen)}>
-              {isOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-            </Button>
+            <div className="flex items-center gap-2">
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button variant="ghost" size="icon">
+                      <RefreshCcw className="h-4 w-4" />
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        This will reset all hourly status data to zero.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction onClick={handleHourlyStatusReset}>Reset</AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+                <Button variant="outline" size="icon" onClick={() => setIsOpen(!isOpen)}>
+                  {isOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                </Button>
+            </div>
         </CardHeader>
         {isOpen && (
             <CardContent className="space-y-8">

@@ -19,8 +19,21 @@ import { Badge } from '@/components/ui/badge';
 import { ThumbsUp, ThumbsDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '../ui/button';
-import { ChevronDown, ChevronUp } from 'lucide-react';
+import { ChevronDown, ChevronUp, RefreshCcw } from 'lucide-react';
 import { Progress } from '../ui/progress';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
+import { useAdmin } from '@/hooks/use-admin';
+
 
 type RoleData = {
   jumlah: number;
@@ -87,12 +100,14 @@ const ProductivityRow = ({ role, data }: { role: string; data: RoleData }) => (
 
 export default function ProductivityHours({ data }: ProductivityHoursProps) {
   const [isOpen, setIsOpen] = React.useState(false);
+  // Note: Resetting productivity hours is handled by resetting the main productivity data.
+  // A separate reset function is not needed here as this component is derived state.
 
   return (
     <Card>
-      <CardHeader className="flex flex-row items-center justify-between cursor-pointer" onClick={() => setIsOpen(!isOpen)}>
+      <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle>Productivity Hours</CardTitle>
-        <Button variant="outline" size="icon">
+         <Button variant="outline" size="icon" onClick={() => setIsOpen(!isOpen)}>
           {isOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
         </Button>
       </CardHeader>
