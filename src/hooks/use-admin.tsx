@@ -326,11 +326,12 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
           // Reset the data to a clean slate before processing
           const newCalculatedData = JSON.parse(JSON.stringify(initialOrderStatusData));
   
-          const statusMapping: { [key: string]: keyof typeof newCalculatedData.types[0]['statuses'] } = {
+          const statusMapping: { [key: string]: keyof typeof newCalculatedData.types[0]['statuses'] | null } = {
             'payment_accepted': 'paymentAccepted',
-            'wavetask_created': 'inProgress',
-            'wavetask_picked': 'picked',
-            'wavetask_packed': 'packed',
+            'wavetask_assign': 'inProgress',
+            'wavetask_progress': 'inProgress',
+            'wavetask_done': 'picked',
+            'wavetask_validated': 'packed',
             'wavetask_shipped': 'shipped',
           };
   
@@ -391,7 +392,7 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
       {
         reference: "ORDER_REF_1",
         status: "wavetask_shipped",
-        payment_date: "11/10/2025 05:16",
+        payment_date: format(new Date(), "MM/dd/yyyy HH:mm"),
         order_type: "COSRX Official Store",
         order_source: "Shopee COSRX",
         total_sku: 1,
@@ -399,12 +400,21 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
       },
        {
         reference: "ORDER_REF_2",
-        status: "wavetask_picked",
-        payment_date: "11/09/2025 08:00",
+        status: "wavetask_validated",
+        payment_date: format(new Date(), "MM/dd/yyyy HH:mm"),
         order_type: "Derma Angel Official Store",
         order_source: "Shopee Derma Angel",
         total_sku: 2,
         total_quant: 3,
+      },
+      {
+        reference: "ORDER_REF_3",
+        status: "wavetask_done",
+        payment_date: format(new Date(), "MM/dd/yyyy HH:mm"),
+        order_type: "Some Other Store",
+        order_source: "Tiktok",
+        total_sku: 1,
+        total_quant: 1,
       }
     ];
 
@@ -462,4 +472,5 @@ export const useAdmin = () => {
   return context;
 };
 
+    
     
