@@ -4,6 +4,8 @@ export const initialMetrics = {
   fulfillmentRate: 0,
 };
 
+// This is now deprecated and will be removed. 
+// The hourly data is now the source of truth, aggregated from the CSV upload.
 export const initialOrderStatusData = {
   types: [
     {

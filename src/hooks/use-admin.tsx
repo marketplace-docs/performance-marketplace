@@ -166,25 +166,6 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
           day2: { day: 2, actual: 0, total: 0 },
         };
         
-        const existingPackedOrder = orderStatusData.types[0].statuses.packed.order;
-        if (totalPacked !== existingPackedOrder && totalPacked > 0) {
-          const newOrderStatusData = {
-            ...orderStatusData,
-            types: orderStatusData.types.map(type => ({
-              ...type,
-              statuses: {
-                ...type.statuses,
-                packed: {
-                  ...type.statuses.packed,
-                  order: totalPacked,
-                  item: totalPacked, 
-                }
-              }
-            }))
-          };
-          setOrderStatusData(newOrderStatusData);
-        }
-
         if (JSON.stringify(newMetrics) !== JSON.stringify(getFromLocalStorage('metrics', initialMetrics))) {
             setMetrics(newMetrics);
         }
@@ -327,67 +308,37 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
           const uploadedData = results.data as any[];
           if (uploadedData.length === 0) return;
   
-          const newCalculatedData = JSON.parse(JSON.stringify(initialOrderStatusData));
-          const newHourlyData = JSON.parse(JSON.stringify(initialHourlyOrderStatusData));
+          const newHourlyData: HourlyOrderStatusData = JSON.parse(JSON.stringify(initialHourlyOrderStatusData));
   
-          const statusMapping: { [key: string]: { recap: keyof typeof newCalculatedData.types[0]['statuses'], hourly: keyof typeof newHourlyData[0] } | null } = {
-            'payment_accepted': { recap: 'paymentAccepted', hourly: 'paymentAccepted' },
-            'wavetask_assign': { recap: 'inProgress', hourly: 'wavetaskAssign' },
-            'wavetask_progress': { recap: 'inProgress', hourly: 'wavetaskProgress' },
-            'wavetask_done': { recap: 'picked', hourly: 'picked' },
-            'wavetask_validated': { recap: 'packed', hourly: 'packed' },
-            'wavetask_shipped': { recap: 'shipped', hourly: 'shipped' },
+          const statusMapping: { [key: string]: keyof typeof newHourlyData[0] } = {
+            'payment_accepted': 'paymentAccepted',
+            'wavetask_assign': 'wavetaskAssign',
+            'wavetask_progress': 'wavetaskProgress',
+            'wavetask_done': 'picked',
+            'wavetask_validated': 'packed',
+            'wavetask_shipped': 'shipped',
           };
   
           uploadedData.forEach(row => {
             const rawStatus = row.status?.toLowerCase();
-            const mappedStatus = statusMapping[rawStatus];
+            const mappedStatusKey = statusMapping[rawStatus];
             
-            if (mappedStatus) {
+            if (mappedStatusKey) {
               const paymentDate = parse(row.payment_date, 'MM/dd/yyyy HH:mm', new Date());
-              if (isNaN(paymentDate.getTime())) return; // Skip if date is invalid
-
-              // Recap Order Status calculation
-              const targetRecapStatus = newCalculatedData.types[0].statuses[mappedStatus.recap];
-              const total_quant = parseInt(row.total_quant) || 0;
-  
-              targetRecapStatus.order += 1;
-              targetRecapStatus.item += total_quant;
-  
-              const today = new Date();
-              const daysDiff = differenceInCalendarDays(today, paymentDate);
-              
-              if (daysDiff >= 3) {
-                targetRecapStatus.hPlus3 += 1;
-              } else if (daysDiff >= 2) {
-                targetRecapStatus.hPlus2 += 1;
-              } else if (daysDiff >= 1) {
-                targetRecapStatus.hPlus1 += 1;
+              if (isNaN(paymentDate.getTime())) {
+                console.warn(`Skipping row with invalid date: ${row.payment_date}`);
+                return;
               }
 
-              // Hourly Order Status calculation
               const hour = getHours(paymentDate);
               const targetHourlyRow = newHourlyData[hour];
-              if (targetHourlyRow && mappedStatus.hourly !== 'inProgress') {
-                (targetHourlyRow[mappedStatus.hourly as keyof typeof targetHourlyRow] as number) += 1;
 
-                if (mappedStatus.hourly === 'wavetaskAssign' || mappedStatus.hourly === 'wavetaskProgress') {
-                    // This part seems tricky based on the new model. Let's aggregate both into their own columns.
-                }
+              if (targetHourlyRow && typeof targetHourlyRow[mappedStatusKey] === 'number') {
+                (targetHourlyRow[mappedStatusKey] as number) += 1;
               }
             }
           });
-  
-          newCalculatedData.types.forEach((type: any) => {
-            Object.keys(type.statuses).forEach(statusKey => {
-              const status = type.statuses[statusKey as keyof typeof type.statuses];
-              if (status.order > 0) {
-                status.avg = status.item / status.order;
-              }
-            });
-          });
           
-          setOrderStatusData(newCalculatedData);
           setHourlyOrderStatusData(newHourlyData);
         },
         error: (error: any) => {
