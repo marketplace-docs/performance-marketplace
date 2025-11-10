@@ -199,13 +199,8 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
         const newPerformance = prevData.performance.map(item => {
             if (item.id === updatedItem.id) {
                 const newItem = { ...item, ...updatedItem };
-                let targetOrder = 0;
-                if(newItem.job === 'Picker') {
-                  targetOrder = 420;
-                } else if (newItem.job === 'Packer') {
-                  targetOrder = 385;
-                }
                 newItem.status = newItem.totalOrder >= newItem.targetOrder ? 'BERHASIL' : 'GAGAL';
+                newItem.progress = newItem.targetOrder > 0 ? (newItem.totalOrder / newItem.targetOrder) * 100 : 0;
                 return newItem;
             }
             return item;
@@ -226,44 +221,59 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
           const uploadedData = results.data as any[];
           if (uploadedData.length === 0) return;
   
-          const jobType = uploadedData[0].job;
-          if (jobType !== 'Picker' && jobType !== 'Packer') {
-            console.error("Invalid job type in CSV. Must be 'Picker' or 'Packer'.");
-            return;
-          }
-  
           setProductivityData(prevData => {
-            // Get all items that are NOT of the jobType being uploaded
-            const otherJobItems = prevData.performance.filter(p => p.job !== jobType);
-
-            // Get the template for the jobType being uploaded
-            const templateForJob = initialProductivityData.performance.filter(p => p.job === jobType);
+            // Create a map of the existing data for quick lookups
+            const existingDataMap = new Map(prevData.performance.map(p => [p.id, p]));
             
-            // Map over the template and update with CSV data where available
-            const updatedItemsForJob = templateForJob.map(templateItem => {
-              const csvRow = uploadedData.find(row => parseInt(row.id) === templateItem.id);
-              
-              if (csvRow) {
+            // Create a map of the uploaded data
+            const uploadedDataMap = new Map(uploadedData.map(row => [parseInt(row.id), row]));
+  
+            // Get the job type from the first row of the CSV
+            const jobType = uploadedData.length > 0 ? uploadedData[0].job : null;
+  
+            if (!jobType || (jobType !== 'Picker' && jobType !== 'Packer')) {
+              console.error("Invalid or missing job type in CSV. Must be 'Picker' or 'Packer'.");
+              return prevData;
+            }
+  
+            // Get the template for the specific job type from initialProductivityData
+            const jobTemplate = initialProductivityData.performance.filter(p => p.job === jobType);
+            const allIds = new Set([...existingDataMap.keys(), ...uploadedDataMap.keys(), ...jobTemplate.map(p => p.id)]);
+  
+            const newPerformance = Array.from(allIds).map(id => {
+              const csvRow = uploadedDataMap.get(id);
+              const existingItem = existingDataMap.get(id);
+              const templateItem = initialProductivityData.performance.find(p => p.id === id);
+  
+              if (csvRow && csvRow.job === jobType) {
+                // This ID is in the CSV and matches the job type, update it
                 const totalOrder = parseInt(csvRow.totalOrder) || 0;
                 const totalQty = parseInt(csvRow.totalQty) || 0;
-                const status = totalOrder >= templateItem.targetOrder ? 'BERHASIL' : 'GAGAL';
-
+                const targetOrder = templateItem?.targetOrder || 0;
+                const status = totalOrder >= targetOrder ? 'BERHASIL' : 'GAGAL';
+                const progress = targetOrder > 0 ? (totalOrder / targetOrder) * 100 : 0;
+                
                 return {
-                  ...templateItem,
+                  ...(templateItem || {}), // Base it on the template
+                  id: id,
                   name: csvRow.name || '',
+                  job: jobType,
                   totalOrder,
                   totalQty,
                   status,
-                };
+                  progress,
+                } as PerformanceItem;
+              } else if (existingItem) {
+                // This ID was not in the CSV or didn't match job type, keep existing data
+                return existingItem;
+              } else if (templateItem) {
+                // This ID is only in the template, use it as a base (for resets)
+                return templateItem;
               }
-              // If no matching data in CSV, check if we have existing data in prevData for this ID
-              const existingItem = prevData.performance.find(p => p.id === templateItem.id);
-              return existingItem || templateItem;
-            });
-            
-            // Combine the updated job items with the other job items
-            const newPerformance = [...otherJobItems, ...updatedItemsForJob].sort((a,b) => a.id - b.id);
-            
+              return null; // Should not happen if allIds is constructed correctly
+            }).filter(Boolean) as PerformanceItem[];
+  
+            newPerformance.sort((a,b) => a.id - b.id);
             return { performance: newPerformance };
           });
         },
@@ -276,6 +286,7 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
         event.target.value = '';
     }
   };
+  
   
   const handleProductivityReset = () => {
     setProductivityData(initialProductivityData);

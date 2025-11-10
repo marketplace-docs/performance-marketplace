@@ -43,6 +43,7 @@ import { Calendar } from '../ui/calendar';
 import { format } from 'date-fns';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { initialProductivityData } from '@/lib/data';
+import { Progress } from '../ui/progress';
 
 type PerformanceData = {
   id: number;
@@ -53,6 +54,7 @@ type PerformanceData = {
   targetOrder: number;
   targetQuantity: number;
   status: string;
+  progress: number;
 };
 
 type ProductivityDashboardProps = {
@@ -82,6 +84,7 @@ const PerformanceTable = ({
           <TableHead>TOTAL QTY</TableHead>
           <TableHead>TARGET ORDER</TableHead>
           <TableHead>TARGET QTY</TableHead>
+          <TableHead>PROGRESS</TableHead>
           <TableHead>STATUS</TableHead>
           <TableHead>ACTION</TableHead>
         </TableRow>
@@ -95,6 +98,12 @@ const PerformanceTable = ({
             <TableCell>{item.totalQty.toLocaleString()}</TableCell>
             <TableCell className="text-destructive font-bold">{item.targetOrder.toLocaleString()}</TableCell>
             <TableCell className="text-destructive font-bold">{item.targetQuantity.toLocaleString()}</TableCell>
+            <TableCell>
+              <div className="flex items-center gap-2">
+                  <Progress value={item.progress} className="w-24 h-3" />
+                  <span className="text-xs font-medium">{item.progress.toFixed(0)}%</span>
+              </div>
+            </TableCell>
             <TableCell>
               <Badge className={cn("text-center font-bold", item.status === "GAGAL" ? "bg-yellow-400 text-black hover:bg-yellow-500" : "bg-green-500 hover:bg-green-600")}>
                 <div className="flex items-center justify-center gap-1">
