@@ -1,9 +1,9 @@
 'use client';
 
 import { createContext, useContext, useState, useEffect, ReactNode, useMemo } from 'react';
-import { initialMetrics, initialDailySummary, initialHourlyBacklog, initialProductivityData, initialProductivityHoursData, initialOrderStatusData } from '@/lib/data';
+import { initialMetrics, initialDailySummary, initialHourlyBacklog, initialProductivityData, initialProductivityHoursData, initialOrderStatusData, initialHourlyOrderStatusData } from '@/lib/data';
 import Papa from 'papaparse';
-import { format, differenceInCalendarDays, parse } from 'date-fns';
+import { format, differenceInCalendarDays, parse, getHours } from 'date-fns';
 
 type Metrics = typeof initialMetrics;
 type DailySummaryData = typeof initialDailySummary;
@@ -12,6 +12,7 @@ type ProductivityData = typeof initialProductivityData;
 type PerformanceItem = ProductivityData['performance'][0];
 type ProductivityHoursData = typeof initialProductivityHoursData;
 type OrderStatusData = typeof initialOrderStatusData;
+type HourlyOrderStatusData = typeof initialHourlyOrderStatusData;
 
 
 const getFromLocalStorage = (key: string, initialValue: any) => {
@@ -42,6 +43,7 @@ type AdminContextType = {
   productivityData: ProductivityData;
   productivityHoursData: ProductivityHoursData;
   orderStatusData: OrderStatusData;
+  hourlyOrderStatusData: HourlyOrderStatusData;
   isClient: boolean;
   isDialogOpen: boolean;
   setIsDialogOpen: (isOpen: boolean) => void;
@@ -75,6 +77,7 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
   const [productivityData, setProductivityData] = useState<ProductivityData>(() => getFromLocalStorage('productivityData', initialProductivityData));
   const [productivityHoursData, setProductivityHoursData] = useState<ProductivityHoursData>(() => getFromLocalStorage('productivityHoursData', initialProductivityHoursData));
   const [orderStatusData, setOrderStatusData] = useState<OrderStatusData>(() => getFromLocalStorage('orderStatusData', initialOrderStatusData));
+  const [hourlyOrderStatusData, setHourlyOrderStatusData] = useState<HourlyOrderStatusData>(() => getFromLocalStorage('hourlyOrderStatusData', initialHourlyOrderStatusData));
 
   const [productivityDate, setProductivityDate] = useState<Date>(() => {
     const savedDate = getFromLocalStorage('productivityDate', null);
@@ -197,12 +200,13 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
         window.localStorage.setItem('rowsPerPage', JSON.stringify(rowsPerPage));
         window.localStorage.setItem('productivityHoursData', JSON.stringify(productivityHoursData));
         window.localStorage.setItem('orderStatusData', JSON.stringify(orderStatusData));
+        window.localStorage.setItem('hourlyOrderStatusData', JSON.stringify(hourlyOrderStatusData));
 
       } catch (error) {
         console.warn('Error writing to localStorage:', error);
       }
     }
-  }, [isClient, totalPacked, metrics, dailySummary, hourlyBacklog, productivityData, productivityDate, rowsPerPage, productivityHoursData, orderStatusData]);
+  }, [isClient, totalPacked, metrics, dailySummary, hourlyBacklog, productivityData, productivityDate, rowsPerPage, productivityHoursData, orderStatusData, hourlyOrderStatusData]);
 
   const handleMetricsUpdate = (data: { forecast: number }) => {
     setMetrics((prevMetrics) => {
@@ -323,16 +327,16 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
           const uploadedData = results.data as any[];
           if (uploadedData.length === 0) return;
   
-          // Reset the data to a clean slate before processing
           const newCalculatedData = JSON.parse(JSON.stringify(initialOrderStatusData));
+          const newHourlyData = JSON.parse(JSON.stringify(initialHourlyOrderStatusData));
   
-          const statusMapping: { [key: string]: keyof typeof newCalculatedData.types[0]['statuses'] | null } = {
-            'payment_accepted': 'paymentAccepted',
-            'wavetask_assign': 'inProgress',
-            'wavetask_progress': 'inProgress',
-            'wavetask_done': 'picked',
-            'wavetask_validated': 'packed',
-            'wavetask_shipped': 'shipped',
+          const statusMapping: { [key: string]: { recap: keyof typeof newCalculatedData.types[0]['statuses'], hourly: keyof typeof newHourlyData[0] } | null } = {
+            'payment_accepted': { recap: 'paymentAccepted', hourly: 'paymentAccepted' },
+            'wavetask_assign': { recap: 'inProgress', hourly: 'wavetaskAssign' },
+            'wavetask_progress': { recap: 'inProgress', hourly: 'wavetaskProgress' },
+            'wavetask_done': { recap: 'picked', hourly: 'picked' },
+            'wavetask_validated': { recap: 'packed', hourly: 'packed' },
+            'wavetask_shipped': { recap: 'shipped', hourly: 'shipped' },
           };
   
           uploadedData.forEach(row => {
@@ -340,30 +344,40 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
             const mappedStatus = statusMapping[rawStatus];
             
             if (mappedStatus) {
-              const targetStatus = newCalculatedData.types[0].statuses[mappedStatus];
+              const paymentDate = parse(row.payment_date, 'MM/dd/yyyy HH:mm', new Date());
+              if (isNaN(paymentDate.getTime())) return; // Skip if date is invalid
+
+              // Recap Order Status calculation
+              const targetRecapStatus = newCalculatedData.types[0].statuses[mappedStatus.recap];
               const total_quant = parseInt(row.total_quant) || 0;
   
-              targetStatus.order += 1;
-              targetStatus.item += total_quant;
+              targetRecapStatus.order += 1;
+              targetRecapStatus.item += total_quant;
   
-              // Calculate H+ logic
-              const paymentDate = parse(row.payment_date, 'MM/dd/yyyy HH:mm', new Date());
-              if (!isNaN(paymentDate.getTime())) {
-                const today = new Date();
-                const daysDiff = differenceInCalendarDays(today, paymentDate);
-                
-                if (daysDiff >= 3) {
-                  targetStatus.hPlus3 += 1;
-                } else if (daysDiff >= 2) {
-                  targetStatus.hPlus2 += 1;
-                } else if (daysDiff >= 1) {
-                  targetStatus.hPlus1 += 1;
+              const today = new Date();
+              const daysDiff = differenceInCalendarDays(today, paymentDate);
+              
+              if (daysDiff >= 3) {
+                targetRecapStatus.hPlus3 += 1;
+              } else if (daysDiff >= 2) {
+                targetRecapStatus.hPlus2 += 1;
+              } else if (daysDiff >= 1) {
+                targetRecapStatus.hPlus1 += 1;
+              }
+
+              // Hourly Order Status calculation
+              const hour = getHours(paymentDate);
+              const targetHourlyRow = newHourlyData[hour];
+              if (targetHourlyRow && mappedStatus.hourly !== 'inProgress') {
+                (targetHourlyRow[mappedStatus.hourly as keyof typeof targetHourlyRow] as number) += 1;
+
+                if (mappedStatus.hourly === 'wavetaskAssign' || mappedStatus.hourly === 'wavetaskProgress') {
+                    // This part seems tricky based on the new model. Let's aggregate both into their own columns.
                 }
               }
             }
           });
   
-          // Calculate AVG
           newCalculatedData.types.forEach((type: any) => {
             Object.keys(type.statuses).forEach(statusKey => {
               const status = type.statuses[statusKey as keyof typeof type.statuses];
@@ -374,6 +388,7 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
           });
           
           setOrderStatusData(newCalculatedData);
+          setHourlyOrderStatusData(newHourlyData);
         },
         error: (error: any) => {
           console.error("Error parsing CSV:", error);
@@ -451,6 +466,7 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
     productivityData: productivityData,
     productivityHoursData,
     orderStatusData,
+    hourlyOrderStatusData,
     isClient,
     isDialogOpen,
     setIsDialogOpen,

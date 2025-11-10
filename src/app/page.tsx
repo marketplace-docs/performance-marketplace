@@ -9,6 +9,7 @@ import ProductivityMenu from '@/components/dashboard/productivity-menu';
 import ProductivityDashboard from '@/components/dashboard/productivity-dashboard';
 import ProductivityHours from '@/components/dashboard/productivity-hours';
 import RecapOrderStatus from '@/components/dashboard/recap-order-status';
+import HourlyOrderStatus from '@/components/dashboard/hourly-order-status';
 
 type Metrics = {
   forecast: number;
@@ -18,7 +19,7 @@ type Metrics = {
 };
 
 export default function Home() {
-  const { metrics, dailySummary, hourlyBacklog, productivityData, isClient, productivityHoursData, orderStatusData } = useAdmin();
+  const { metrics, dailySummary, hourlyBacklog, productivityData, isClient, productivityHoursData, orderStatusData, hourlyOrderStatusData } = useAdmin();
 
   if (!isClient) {
     return null;
@@ -40,6 +41,7 @@ export default function Home() {
       <Backlog hourlyData={hourlyBacklog} />
       <ProductivityHours data={productivityHoursData} />
       <RecapOrderStatus data={orderStatusData} />
+      <HourlyOrderStatus data={hourlyOrderStatusData} />
     </main>
   );
 }

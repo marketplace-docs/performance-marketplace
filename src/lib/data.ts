@@ -51,6 +51,17 @@ export const initialHourlyBacklog = [
   { hour: '23:00', value: 0 },
 ];
 
+export const initialHourlyOrderStatusData = Array.from({ length: 24 }, (_, i) => ({
+    hour: `${i.toString().padStart(2, '0')}:00`,
+    paymentAccepted: 0,
+    wavetaskAssign: 0,
+    wavetaskProgress: 0,
+    picked: 0,
+    packed: 0,
+    shipped: 0,
+}));
+
+
 export const initialPerformanceData = {
   picker: 0,
   packer: 0,
