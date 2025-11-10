@@ -108,10 +108,10 @@ export default function ProductivityHours({ data }: ProductivityHoursProps) {
                   <TableHead>Total Quantity</TableHead>
                   <TableHead>Avg Order Hours</TableHead>
                   <TableHead>Avg Quantity Hours</TableHead>
-                  <TableHead>Target Order Hours</TableHead>
-                  <TableHead>Target Quantity Hours</TableHead>
-                  <TableHead>Target End Shift Order</TableHead>
-                  <TableHead>Target End Shift Quantity</TableHead>
+                  <TableHead>Benchmark Order / Hour</TableHead>
+                  <TableHead>Benchmark Quantity / Hour</TableHead>
+                  <TableHead>Benchmark End Shift Order</TableHead>
+                  <TableHead>Benchmark End Shift Quantity</TableHead>
                   <TableHead>Progress</TableHead>
                   <TableHead>Status</TableHead>
                 </TableRow>
