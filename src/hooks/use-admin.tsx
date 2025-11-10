@@ -1,7 +1,7 @@
 'use client';
 
 import { createContext, useContext, useState, useEffect, ReactNode, useMemo } from 'react';
-import { initialMetrics, initialDailySummary, initialHourlyBacklog, initialProductivityData, initialProductivityHoursData } from '@/lib/data';
+import { initialMetrics, initialDailySummary, initialHourlyBacklog, initialProductivityData, initialProductivityHoursData, initialOrderStatusData } from '@/lib/data';
 import Papa from 'papaparse';
 import { format } from 'date-fns';
 
@@ -11,6 +11,7 @@ type HourlyBacklogData = typeof initialHourlyBacklog;
 type ProductivityData = typeof initialProductivityData;
 type PerformanceItem = ProductivityData['performance'][0];
 type ProductivityHoursData = typeof initialProductivityHoursData;
+type OrderStatusData = typeof initialOrderStatusData;
 
 
 const getFromLocalStorage = (key: string, initialValue: any) => {
@@ -40,6 +41,7 @@ type AdminContextType = {
   hourlyBacklog: HourlyBacklogData;
   productivityData: ProductivityData;
   productivityHoursData: ProductivityHoursData;
+  orderStatusData: OrderStatusData;
   isClient: boolean;
   isDialogOpen: boolean;
   setIsDialogOpen: (isOpen: boolean) => void;
@@ -68,8 +70,9 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
   const [metrics, setMetrics] = useState<Metrics>(() => getFromLocalStorage('metrics', initialMetrics));
   const [dailySummary, setDailySummary] = useState<DailySummaryData>(() => getFromLocalStorage('dailySummary', initialDailySummary));
   const [hourlyBacklog, setHourlyBacklog] = useState<HourlyBacklogData>(() => getFromLocalStorage('hourlyBacklog', initialHourlyBacklog));
-  const [productivityData, setProductivityData] = useState<ProductivityData>(() => getFromLocalStorage('productivityData', { performance: [] }));
+  const [productivityData, setProductivityData] = useState<ProductivityData>(() => getFromLocalStorage('productivityData', initialProductivityData));
   const [productivityHoursData, setProductivityHoursData] = useState<ProductivityHoursData>(() => getFromLocalStorage('productivityHoursData', initialProductivityHoursData));
+  const [orderStatusData, setOrderStatusData] = useState<OrderStatusData>(() => getFromLocalStorage('orderStatusData', initialOrderStatusData));
 
   const [productivityDate, setProductivityDate] = useState<Date>(() => {
     const savedDate = getFromLocalStorage('productivityDate', null);
@@ -157,6 +160,24 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
           day1: { day: 1, actual: totalPacked, total: totalPacked },
           day2: { day: 2, actual: 0, total: 0 },
         };
+        
+        const packedItems = hourlyBacklog.reduce((acc, curr) => acc + curr.value, 0);
+        const newOrderStatusData = {
+          ...initialOrderStatusData,
+          types: initialOrderStatusData.types.map(type => ({
+            ...type,
+            statuses: {
+              ...type.statuses,
+              packed: {
+                ...type.statuses.packed,
+                order: packedItems,
+                item: packedItems, 
+              }
+            }
+          }))
+        };
+        setOrderStatusData(newOrderStatusData);
+
 
         if (JSON.stringify(newMetrics) !== JSON.stringify(getFromLocalStorage('metrics', initialMetrics))) {
             setMetrics(newMetrics);
@@ -172,7 +193,7 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
         window.localStorage.setItem('productivityDate', JSON.stringify(productivityDate));
         window.localStorage.setItem('rowsPerPage', JSON.stringify(rowsPerPage));
         window.localStorage.setItem('productivityHoursData', JSON.stringify(productivityHoursData));
-
+        window.localStorage.setItem('orderStatusData', JSON.stringify(newOrderStatusData));
 
       } catch (error) {
         console.warn('Error writing to localStorage:', error);
@@ -222,59 +243,37 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
           if (uploadedData.length === 0) return;
   
           setProductivityData(prevData => {
-            // Create a map of the existing data for quick lookups
-            const existingDataMap = new Map(prevData.performance.map(p => [p.id, p]));
-            
-            // Create a map of the uploaded data
-            const uploadedDataMap = new Map(uploadedData.map(row => [parseInt(row.id), row]));
-  
-            // Get the job type from the first row of the CSV
             const jobType = uploadedData.length > 0 ? uploadedData[0].job : null;
-  
             if (!jobType || (jobType !== 'Picker' && jobType !== 'Packer')) {
               console.error("Invalid or missing job type in CSV. Must be 'Picker' or 'Packer'.");
               return prevData;
             }
-  
-            // Get the template for the specific job type from initialProductivityData
-            const jobTemplate = initialProductivityData.performance.filter(p => p.job === jobType);
-            const allIds = new Set([...existingDataMap.keys(), ...uploadedDataMap.keys(), ...jobTemplate.map(p => p.id)]);
-  
-            const newPerformance = Array.from(allIds).map(id => {
-              const csvRow = uploadedDataMap.get(id);
-              const existingItem = existingDataMap.get(id);
-              const templateItem = initialProductivityData.performance.find(p => p.id === id);
-  
-              if (csvRow && csvRow.job === jobType) {
-                // This ID is in the CSV and matches the job type, update it
-                const totalOrder = parseInt(csvRow.totalOrder) || 0;
-                const totalQty = parseInt(csvRow.totalQty) || 0;
-                const targetOrder = templateItem?.targetOrder || 0;
-                const status = totalOrder >= targetOrder ? 'BERHASIL' : 'GAGAL';
-                const progress = targetOrder > 0 ? (totalOrder / targetOrder) * 100 : 0;
-                
-                return {
-                  ...(templateItem || {}), // Base it on the template
-                  id: id,
-                  name: csvRow.name || '',
-                  job: jobType,
-                  totalOrder,
-                  totalQty,
-                  status,
-                  progress,
-                } as PerformanceItem;
-              } else if (existingItem) {
-                // This ID was not in the CSV or didn't match job type, keep existing data
-                return existingItem;
-              } else if (templateItem) {
-                // This ID is only in the template, use it as a base (for resets)
-                return templateItem;
+
+            const updatedPerformance = [...prevData.performance];
+            const uploadedMap = new Map(uploadedData.map(row => [parseInt(row.id), row]));
+
+            uploadedMap.forEach((csvRow, id) => {
+              const index = updatedPerformance.findIndex(p => p.id === id);
+              if (index !== -1 && updatedPerformance[index].job === jobType) {
+                  const templateItem = initialProductivityData.performance.find(p => p.id === id);
+                  const totalOrder = parseInt(csvRow.totalOrder) || 0;
+                  const totalQty = parseInt(csvRow.totalQty) || 0;
+                  const targetOrder = templateItem?.targetOrder || 0;
+                  const status = totalOrder >= targetOrder ? 'BERHASIL' : 'GAGAL';
+                  const progress = targetOrder > 0 ? (totalOrder / targetOrder) * 100 : 0;
+
+                  updatedPerformance[index] = {
+                      ...updatedPerformance[index],
+                      name: csvRow.name || '',
+                      totalOrder,
+                      totalQty,
+                      status,
+                      progress,
+                  };
               }
-              return null; // Should not happen if allIds is constructed correctly
-            }).filter(Boolean) as PerformanceItem[];
-  
-            newPerformance.sort((a,b) => a.id - b.id);
-            return { performance: newPerformance };
+            });
+
+            return { performance: updatedPerformance };
           });
         },
         error: (error: any) => {
@@ -318,6 +317,7 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
     hourlyBacklog,
     productivityData: productivityData,
     productivityHoursData,
+    orderStatusData,
     isClient,
     isDialogOpen,
     setIsDialogOpen,

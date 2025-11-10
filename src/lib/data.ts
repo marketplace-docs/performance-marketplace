@@ -4,7 +4,7 @@ export const initialMetrics = {
   fulfillmentRate: 0,
 };
 
-export const initialBacklogData = {
+export const initialOrderStatusData = {
   types: [
     {
       name: "Marketplace",
@@ -65,8 +65,8 @@ const generatePerformanceData = () => {
       job: "Picker",
       totalOrder: 0,
       totalQty: 0,
-      targetOrder: 420,
-      targetQuantity: 1085,
+      targetOrder: 7500,
+      targetQuantity: 10850,
       status: "GAGAL",
       progress: 0,
     });
@@ -79,8 +79,8 @@ const generatePerformanceData = () => {
       job: "Packer",
       totalOrder: 0,
       totalQty: 0,
-      targetOrder: 385,
-      targetQuantity: 975,
+      targetOrder: 7250,
+      targetQuantity: 9750,
       status: "GAGAL",
       progress: 0,
     });
@@ -123,6 +123,19 @@ export const initialProductivityHoursData = {
 
 
 // Deprecated data, will be removed in future versions
+export const initialBacklogData = {
+  types: [
+    {
+      name: "Marketplace",
+      statuses: {
+        paymentAccepted: { order: 0, item: 0, avg: 0 },
+        inProgress: { order: 0, item: 0, avg: 0 },
+        picked: { order: 0, item: 0, avg: 0 },
+        packed: { order: 0, item: 0, avg: 0 },
+      },
+    },
+  ],
+};
 export const keyMetrics = { details: [], progress: 0 };
 export const orderStatusBacklog = [];
 export const dailyBreakdown = [];
