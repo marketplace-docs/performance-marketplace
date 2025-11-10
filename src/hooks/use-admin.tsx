@@ -354,11 +354,9 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
                 
                 if (daysDiff >= 3) {
                   targetStatus.hPlus3 += 1;
-                }
-                if (daysDiff >= 2) {
+                } else if (daysDiff >= 2) {
                   targetStatus.hPlus2 += 1;
-                }
-                if (daysDiff >= 1) {
+                } else if (daysDiff >= 1) {
                   targetStatus.hPlus1 += 1;
                 }
               }
