@@ -388,36 +388,52 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const handleOrderStatusTemplateExport = () => {
-    const rows = [
-      {
-        reference: "ORDER_REF_1",
-        status: "wavetask_shipped",
-        payment_date: format(new Date(), "MM/dd/yyyy HH:mm"),
-        order_type: "COSRX Official Store",
-        order_source: "Shopee COSRX",
-        total_sku: 1,
-        total_quant: 1,
-      },
-       {
-        reference: "ORDER_REF_2",
-        status: "wavetask_validated",
-        payment_date: format(new Date(), "MM/dd/yyyy HH:mm"),
-        order_type: "Derma Angel Official Store",
-        order_source: "Shopee Derma Angel",
-        total_sku: 2,
-        total_quant: 3,
-      },
-      {
-        reference: "ORDER_REF_3",
-        status: "wavetask_done",
-        payment_date: format(new Date(), "MM/dd/yyyy HH:mm"),
-        order_type: "Some Other Store",
-        order_source: "Tiktok",
-        total_sku: 1,
-        total_quant: 1,
-      }
+    const storeList = [
+      { order_type: "Jung Saem Mool Official Store", order_source: "Shopee Jung Saem Mool" },
+      { order_type: "Amuse Official Store", order_source: "Shopee Amuse" },
+      { order_type: "Carasun.id Official Store", order_source: "Shopee Carasun" },
+      { order_type: "Ariul Official Store", order_source: "Shopee Ariul" },
+      { order_type: "Dr G Official Store", order_source: "Shopee Dr G" },
+      { order_type: "Im From Official Store", order_source: "Shopee Im From" },
+      { order_type: "COSRX Official Store", order_source: "Shopee COSRX" },
+      { order_type: "Espoir Official Store", order_source: "Shopee Espoir" },
+      { order_type: "Mediheal Official Store", order_source: "Shopee Mediheal" },
+      { order_type: "Keana Official Store", order_source: "Shopee Keana" },
+      { order_type: "Lilla Baby Indonesia", order_source: "Shopee Lilla Baby" },
+      { order_type: "Lilla Official store", order_source: "Shopee lilla" },
+      { order_type: "Edit by Sociolla", order_source: "Shopee" },
+      { order_type: "Round Lab Official Store", order_source: "Shopee Round Lab" },
+      { order_type: "Speak To Me Official Store", order_source: "Shopee Speak to me" },
+      { order_type: "Sukin Official Store", order_source: "Shopee Sukin" },
+      { order_type: "Woshday Official Store", order_source: "Shopee Woshday" },
+      { order_type: "Gemistry Official Store", order_source: "Shopee Gemistry" },
+      { order_type: "Sungboon Editor Official Store", order_source: "Shopee Sungboon Editor" },
+      { order_type: "Derma Angel Official Store", order_source: "Shopee Derma Angel" },
+      { order_type: "UIQ Official Store", order_source: "Shopee UIQ" },
+      { order_type: "UB Mom Indonesia", order_source: "Shopee UB Mom" },
+      { order_type: "Bioheal Official Store", order_source: "Shopee Bioheal" },
+      { order_type: "COSRX Official Store", order_source: "Lazada Cosrx" },
+      { order_type: "Lilla Official store", order_source: "tiktok_lilla" },
+      { order_type: "COSRX Official Store", order_source: "tiktok_cosrx" },
+      { order_type: "Carasun.id Official Store", order_source: "tiktok_carasun" },
+      { order_type: "Derma Angel Official Store", order_source: "tiktok_derma_angel" },
+      { order_type: "Lilla Baby Indonesia", order_source: "tiktok_lilla_Baby" },
+      { order_type: "Edit by Sociolla", order_source: "tiktok" },
+      { order_type: "Round Lab Official Store", order_source: "tiktok_roundlab" },
     ];
 
+    const statuses = ["payment_accepted", "wavetask_assign", "wavetask_progress", "wavetask_done", "wavetask_validated", "wavetask_shipped"];
+
+    const rows = storeList.map((store, index) => ({
+      reference: `ORDER_REF_${index + 1}`,
+      status: statuses[index % statuses.length],
+      payment_date: format(new Date(), "MM/dd/yyyy HH:mm"),
+      order_type: store.order_type,
+      order_source: store.order_source,
+      total_sku: Math.floor(Math.random() * 3) + 1,
+      total_quant: Math.floor(Math.random() * 5) + 1,
+    }));
+    
     const csv = Papa.unparse(rows);
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement("a");
