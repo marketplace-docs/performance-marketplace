@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { ChevronUp, ChevronDown } from 'lucide-react';
 
 export default function ProductivityMenu({ children }: { children: React.ReactNode }) {
-  const [isOpen, setIsOpen] = useState(true);
+  const [isOpen, setIsOpen] = useState(false);
 
   return (
     <Card>

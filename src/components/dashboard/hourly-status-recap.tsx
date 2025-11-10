@@ -43,7 +43,7 @@ const statusDisplayMapping: { key: keyof Omit<HourlyStatus, 'hour'>; label: stri
 ];
 
 export default function HourlyStatusRecap({ data }: HourlyStatusRecapProps) {
-    const [isOpen, setIsOpen] = useState(true);
+    const [isOpen, setIsOpen] = useState(false);
 
     if (!data || data.length === 0) {
         return (

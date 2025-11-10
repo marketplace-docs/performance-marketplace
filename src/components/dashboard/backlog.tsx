@@ -21,7 +21,7 @@ type BacklogProps = {
 };
 
 export default function Backlog({ hourlyData }: BacklogProps) {
-  const [isOpen, setIsOpen] = useState(true);
+  const [isOpen, setIsOpen] = useState(false);
 
   return (
     <Card>

@@ -86,7 +86,7 @@ const ProductivityRow = ({ role, data }: { role: string; data: RoleData }) => (
 );
 
 export default function ProductivityHours({ data }: ProductivityHoursProps) {
-  const [isOpen, setIsOpen] = React.useState(true);
+  const [isOpen, setIsOpen] = React.useState(false);
 
   return (
     <Card>
