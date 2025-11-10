@@ -55,34 +55,41 @@ export const initialPerformanceData = {
   packer: 0,
 };
 
+const generatePerformanceData = () => {
+  const performance = [];
+  // 100 Pickers
+  for (let i = 1; i <= 100; i++) {
+    performance.push({
+      id: i,
+      name: "",
+      job: "Picker",
+      totalOrder: 0,
+      totalQty: 0,
+      targetOrder: 420,
+      targetQuantity: 1085,
+      status: "GAGAL",
+      progress: 0,
+    });
+  }
+  // 100 Packers
+  for (let i = 1; i <= 100; i++) {
+    performance.push({
+      id: i + 100,
+      name: "",
+      job: "Packer",
+      totalOrder: 0,
+      totalQty: 0,
+      targetOrder: 385,
+      targetQuantity: 975,
+      status: "GAGAL",
+      progress: 0,
+    });
+  }
+  return performance;
+};
+
 export const initialProductivityData = {
-  performance: [
-    { id: 1, name: "", job: "Picker", totalOrder: 0, totalQty: 0, targetOrder: 420, targetQuantity: 1085, status: "GAGAL", progress: 0 },
-    { id: 2, name: "", job: "Picker", totalOrder: 0, totalQty: 0, targetOrder: 420, targetQuantity: 1085, status: "GAGAL", progress: 0 },
-    { id: 3, name: "", job: "Picker", totalOrder: 0, totalQty: 0, targetOrder: 420, targetQuantity: 1085, status: "GAGAL", progress: 0 },
-    { id: 4, name: "", job: "Picker", totalOrder: 0, totalQty: 0, targetOrder: 420, targetQuantity: 1085, status: "GAGAL", progress: 0 },
-    { id: 5, name: "", job: "Picker", totalOrder: 0, totalQty: 0, targetOrder: 420, targetQuantity: 1085, status: "GAGAL", progress: 0 },
-    { id: 6, name: "", job: "Picker", totalOrder: 0, totalQty: 0, targetOrder: 420, targetQuantity: 1085, status: "GAGAL", progress: 0 },
-    { id: 7, name: "", job: "Picker", totalOrder: 0, totalQty: 0, targetOrder: 420, targetQuantity: 1085, status: "GAGAL", progress: 0 },
-    { id: 8, name: "", job: "Picker", totalOrder: 0, totalQty: 0, targetOrder: 420, targetQuantity: 1085, status: "GAGAL", progress: 0 },
-    { id: 9, name: "", job: "Picker", totalOrder: 0, totalQty: 0, targetOrder: 420, targetQuantity: 1085, status: "GAGAL", progress: 0 },
-    { id: 10, name: "", job: "Picker", totalOrder: 0, totalQty: 0, targetOrder: 420, targetQuantity: 1085, status: "GAGAL", progress: 0 },
-    { id: 11, name: "", job: "Picker", totalOrder: 0, totalQty: 0, targetOrder: 420, targetQuantity: 1085, status: "GAGAL", progress: 0 },
-    { id: 12, name: "", job: "Packer", totalOrder: 0, totalQty: 0, targetOrder: 385, targetQuantity: 975, status: "GAGAL", progress: 0 },
-    { id: 13, name: "", job: "Packer", totalOrder: 0, totalQty: 0, targetOrder: 385, targetQuantity: 975, status: "GAGAL", progress: 0 },
-    { id: 14, name: "", job: "Packer", totalOrder: 0, totalQty: 0, targetOrder: 385, targetQuantity: 975, status: "GAGAL", progress: 0 },
-    { id: 15, name: "", job: "Packer", totalOrder: 0, totalQty: 0, targetOrder: 385, targetQuantity: 975, status: "GAGAL", progress: 0 },
-    { id: 16, name: "", job: "Packer", totalOrder: 0, totalQty: 0, targetOrder: 385, targetQuantity: 975, status: "GAGAL", progress: 0 },
-    { id: 17, name: "", job: "Packer", totalOrder: 0, totalQty: 0, targetOrder: 385, targetQuantity: 975, status: "GAGAL", progress: 0 },
-    { id: 18, name: "", job: "Packer", totalOrder: 0, totalQty: 0, targetOrder: 385, targetQuantity: 975, status: "GAGAL", progress: 0 },
-    { id: 19, name: "", job: "Packer", totalOrder: 0, totalQty: 0, targetOrder: 385, targetQuantity: 975, status: "GAGAL", progress: 0 },
-    { id: 20, name: "", job: "Packer", totalOrder: 0, totalQty: 0, targetOrder: 385, targetQuantity: 975, status: "GAGAL", progress: 0 },
-    { id: 21, name: "", job: "Packer", totalOrder: 0, totalQty: 0, targetOrder: 385, targetQuantity: 975, status: "GAGAL", progress: 0 },
-    { id: 22, name: "", job: "Packer", totalOrder: 0, totalQty: 0, targetOrder: 385, targetQuantity: 975, status: "GAGAL", progress: 0 },
-    { id: 23, name: "", job: "Packer", totalOrder: 0, totalQty: 0, targetOrder: 385, targetQuantity: 975, status: "GAGAL", progress: 0 },
-    { id: 24, name: "", job: "Packer", totalOrder: 0, totalQty: 0, targetOrder: 385, targetQuantity: 975, status: "GAGAL", progress: 0 },
-    { id: 25, name: "", job: "Packer", totalOrder: 0, totalQty: 0, targetOrder: 385, targetQuantity: 975, status: "GAGAL", progress: 0 },
-  ]
+  performance: generatePerformanceData()
 };
 
 export const initialProductivityHoursData = {
