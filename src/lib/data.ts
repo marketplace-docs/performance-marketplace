@@ -13,6 +13,7 @@ export const initialOrderStatusData = {
         inProgress: { order: 0, item: 0, avg: 0 },
         picked: { order: 0, item: 0, avg: 0 },
         packed: { order: 0, item: 0, avg: 0 },
+        shipped: { order: 0, item: 0, avg: 0 },
       },
     },
   ],

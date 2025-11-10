@@ -32,6 +32,7 @@ type OrderStatusData = {
       inProgress: Status;
       picked: Status;
       packed: Status;
+      shipped: Status;
     };
   }[];
 };
@@ -56,6 +57,7 @@ const statusLabels: Record<string, string> = {
     inProgress: 'In Progress',
     picked: 'Picked',
     packed: 'Packed',
+    shipped: 'Shipped',
 };
 
 export default function RecapOrderStatus({ data }: RecapOrderStatusProps) {
