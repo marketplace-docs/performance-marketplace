@@ -3,7 +3,7 @@
 import { createContext, useContext, useState, useEffect, ReactNode, useMemo } from 'react';
 import { initialMetrics, initialDailySummary, initialHourlyBacklog, initialProductivityData, initialProductivityHoursData, initialOrderStatusData } from '@/lib/data';
 import Papa from 'papaparse';
-import { format } from 'date-fns';
+import { format, differenceInCalendarDays, parse } from 'date-fns';
 
 type Metrics = typeof initialMetrics;
 type DailySummaryData = typeof initialDailySummary;
@@ -163,9 +163,8 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
           day2: { day: 2, actual: 0, total: 0 },
         };
         
-        // This is now automatically handled for packed items, but can be overridden by CSV upload
         const existingPackedOrder = orderStatusData.types[0].statuses.packed.order;
-        if (totalPacked !== existingPackedOrder) {
+        if (totalPacked !== existingPackedOrder && totalPacked > 0) {
           const newOrderStatusData = {
             ...orderStatusData,
             types: orderStatusData.types.map(type => ({
@@ -323,29 +322,59 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
         complete: (results) => {
           const uploadedData = results.data as any[];
           if (uploadedData.length === 0) return;
-
-          setOrderStatusData(prevData => {
-            const newData = JSON.parse(JSON.stringify(prevData)); // Deep copy
+  
+          // Reset the data to a clean slate before processing
+          const newCalculatedData = JSON.parse(JSON.stringify(initialOrderStatusData));
+  
+          const statusMapping: { [key: string]: keyof typeof newCalculatedData.types[0]['statuses'] } = {
+            'payment_accepted': 'paymentAccepted',
+            'wavetask_created': 'inProgress',
+            'wavetask_picked': 'picked',
+            'wavetask_packed': 'packed',
+            'wavetask_shipped': 'shipped',
+          };
+  
+          uploadedData.forEach(row => {
+            const rawStatus = row.status?.toLowerCase();
+            const mappedStatus = statusMapping[rawStatus];
             
-            uploadedData.forEach(row => {
-              const { type, status, order, item, avg, hPlus1, hPlus2, hPlus3 } = row;
-              const typeIndex = newData.types.findIndex((t: any) => t.name === type);
-              
-              if (typeIndex !== -1 && status in newData.types[typeIndex].statuses) {
-                const statusKey = status as keyof typeof newData.types[typeIndex].statuses;
-                newData.types[typeIndex].statuses[statusKey] = {
-                  order: parseInt(order) || 0,
-                  item: parseInt(item) || 0,
-                  avg: parseFloat(avg) || 0,
-                  hPlus1: parseInt(hPlus1) || 0,
-                  hPlus2: parseInt(hPlus2) || 0,
-                  hPlus3: parseInt(hPlus3) || 0,
-                };
+            if (mappedStatus) {
+              const targetStatus = newCalculatedData.types[0].statuses[mappedStatus];
+              const total_quant = parseInt(row.total_quant) || 0;
+  
+              targetStatus.order += 1;
+              targetStatus.item += total_quant;
+  
+              // Calculate H+ logic
+              const paymentDate = parse(row.payment_date, 'MM/dd/yyyy HH:mm', new Date());
+              if (!isNaN(paymentDate.getTime())) {
+                const today = new Date();
+                const daysDiff = differenceInCalendarDays(today, paymentDate);
+                
+                if (daysDiff >= 3) {
+                  targetStatus.hPlus3 += 1;
+                }
+                if (daysDiff >= 2) {
+                  targetStatus.hPlus2 += 1;
+                }
+                if (daysDiff >= 1) {
+                  targetStatus.hPlus1 += 1;
+                }
+              }
+            }
+          });
+  
+          // Calculate AVG
+          newCalculatedData.types.forEach((type: any) => {
+            Object.keys(type.statuses).forEach(statusKey => {
+              const status = type.statuses[statusKey as keyof typeof type.statuses];
+              if (status.order > 0) {
+                status.avg = status.item / status.order;
               }
             });
-            
-            return newData;
           });
+          
+          setOrderStatusData(newCalculatedData);
         },
         error: (error: any) => {
           console.error("Error parsing CSV:", error);
@@ -358,30 +387,33 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const handleOrderStatusTemplateExport = () => {
-    const data = initialOrderStatusData;
-    const rows: any[] = [];
-    
-    data.types.forEach(type => {
-      Object.entries(type.statuses).forEach(([statusKey, statusValue]) => {
-        rows.push({
-          type: type.name,
-          status: statusKey,
-          order: 0,
-          item: 0,
-          avg: 0,
-          hPlus1: 0,
-          hPlus2: 0,
-          hPlus3: 0,
-        });
-      });
-    });
+    const rows = [
+      {
+        reference: "ORDER_REF_1",
+        status: "wavetask_shipped",
+        payment_date: "11/10/2025 05:16",
+        order_type: "COSRX Official Store",
+        order_source: "Shopee COSRX",
+        total_sku: 1,
+        total_quant: 1,
+      },
+       {
+        reference: "ORDER_REF_2",
+        status: "wavetask_picked",
+        payment_date: "11/09/2025 08:00",
+        order_type: "Derma Angel Official Store",
+        order_source: "Shopee Derma Angel",
+        total_sku: 2,
+        total_quant: 3,
+      }
+    ];
 
     const csv = Papa.unparse(rows);
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement("a");
     const url = URL.createObjectURL(blob);
     link.setAttribute("href", url);
-    link.setAttribute("download", "order_status_template.csv");
+    link.setAttribute("download", "raw_order_status_template.csv");
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -429,3 +461,5 @@ export const useAdmin = () => {
   }
   return context;
 };
+
+    
