@@ -100,8 +100,8 @@ const PerformanceTable = ({
             <TableCell className="text-destructive font-bold">{item.targetQuantity.toLocaleString()}</TableCell>
             <TableCell>
               <div className="flex items-center gap-2">
-                  <Progress value={item.progress} className="w-24 h-3" />
-                  <span className="text-xs font-medium">{item.progress.toFixed(0)}%</span>
+                  <Progress value={item.progress || 0} className="w-24 h-3" />
+                  <span className="text-xs font-medium">{(item.progress || 0).toFixed(0)}%</span>
               </div>
             </TableCell>
             <TableCell>
