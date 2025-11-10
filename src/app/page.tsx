@@ -33,10 +33,10 @@ export default function Home() {
           <DailySummary data={dailySummary} />
         </div>
       </div>
-      <Backlog hourlyData={hourlyBacklog} />
       <ProductivityMenu>
         <ProductivityDashboard data={productivityData} />
       </ProductivityMenu>
+      <Backlog hourlyData={hourlyBacklog} />
       <ProductivityHours data={productivityHoursData} />
     </main>
   );
