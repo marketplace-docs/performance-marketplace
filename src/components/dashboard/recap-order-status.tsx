@@ -44,7 +44,10 @@ type RecapOrderStatusProps = {
   data: OrderStatusData;
 };
 
-const formatNumber = (num: number) => {
+const formatNumber = (num: number | undefined | null) => {
+    if (num === null || num === undefined) {
+        return '0';
+    }
     if (Number.isInteger(num)) {
         return num.toLocaleString();
     }
