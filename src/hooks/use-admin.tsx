@@ -49,7 +49,6 @@ type AdminContextType = {
   setEditingPerformance: (item: PerformanceItem | null) => void;
   handleMetricsUpdate: (data: { forecast: number }) => void;
   handleHourlyBacklogUpdate: (data: { hourlyData: { hour: string; value: number }[] }) => void;
-  handlePerformanceUpdate: (data: any) => void;
   handleProductivityUpdate: (data: PerformanceItem) => void;
   handleFileUpload: (event: React.ChangeEvent<HTMLInputElement>) => void;
   handleProductivityReset: () => void;
@@ -90,9 +89,8 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
     setIsClient(true);
   }, []);
 
-  const { totalPacked } = useMemo(() => {
-    const total = hourlyBacklog.reduce((sum, item) => sum + item.value, 0);
-    return { totalPacked: total };
+  const totalPacked = useMemo(() => {
+    return hourlyBacklog.reduce((sum, item) => sum + item.value, 0);
   }, [hourlyBacklog]);
   
   useEffect(() => {
@@ -160,10 +158,10 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
           day2: { day: 2, actual: 0, total: 0 },
         };
 
-        if (JSON.stringify(newMetrics) !== JSON.stringify(metrics)) {
+        if (JSON.stringify(newMetrics) !== JSON.stringify(getFromLocalStorage('metrics', initialMetrics))) {
             setMetrics(newMetrics);
         }
-        if (JSON.stringify(newDailySummary) !== JSON.stringify(dailySummary)) {
+        if (JSON.stringify(newDailySummary) !== JSON.stringify(getFromLocalStorage('dailySummary', initialDailySummary))) {
             setDailySummary(newDailySummary);
         }
 
@@ -193,11 +191,6 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
   
   const handleHourlyBacklogUpdate = (data: { hourlyData: { hour: string; value: number }[] }) => {
     setHourlyBacklog(data.hourlyData);
-    setIsDialogOpen(false);
-  };
-
-  const handlePerformanceUpdate = (data: any) => {
-    // This function is now empty as performanceData is removed
     setIsDialogOpen(false);
   };
 
@@ -240,48 +233,35 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
           }
   
           setProductivityData(prevData => {
-            const currentPerformance = prevData.performance;
+            // Get all items that are NOT of the jobType being uploaded
+            const otherJobItems = prevData.performance.filter(p => p.job !== jobType);
 
-            const newItemsFromCSV = uploadedData.map(row => {
-              const id = parseInt(row.id);
-              if (isNaN(id) || row.job !== jobType) return null;
-    
-              const totalOrder = parseInt(row.totalOrder) || 0;
-              const totalQty = parseInt(row.totalQty) || 0;
+            // Get the template for the jobType being uploaded
+            const templateForJob = initialProductivityData.performance.filter(p => p.job === jobType);
+            
+            // Map over the template and update with CSV data where available
+            const updatedItemsForJob = templateForJob.map(templateItem => {
+              const csvRow = uploadedData.find(row => parseInt(row.id) === templateItem.id);
               
-              let targetOrder = 0;
-              let targetQuantity = 0;
-    
-              if (jobType === 'Picker') {
-                targetOrder = 420;
-                targetQuantity = 1085;
-              } else if (jobType === 'Packer') {
-                targetOrder = 385;
-                targetQuantity = 975;
-              }
-    
-              const status = totalOrder >= targetOrder ? 'BERHASIL' : 'GAGAL';
-    
-              return {
-                id,
-                name: row.name || '',
-                job: jobType,
-                totalOrder,
-                totalQty,
-                targetOrder,
-                targetQuantity,
-                status
-              }
-            }).filter(Boolean) as PerformanceItem[];
+              if (csvRow) {
+                const totalOrder = parseInt(csvRow.totalOrder) || 0;
+                const totalQty = parseInt(csvRow.totalQty) || 0;
+                const status = totalOrder >= templateItem.targetOrder ? 'BERHASIL' : 'GAGAL';
 
-            const existingItemsForJob = currentPerformance.filter(p => p.job === jobType);
-            const otherJobItems = currentPerformance.filter(p => p.job !== jobType);
-
-            const updatedItemsForJob = existingItemsForJob.map(existingItem => {
-              const newItem = newItemsFromCSV.find(up => up.id === existingItem.id);
-              return newItem || existingItem;
+                return {
+                  ...templateItem,
+                  name: csvRow.name || '',
+                  totalOrder,
+                  totalQty,
+                  status,
+                };
+              }
+              // If no matching data in CSV, check if we have existing data in prevData for this ID
+              const existingItem = prevData.performance.find(p => p.id === templateItem.id);
+              return existingItem || templateItem;
             });
             
+            // Combine the updated job items with the other job items
             const newPerformance = [...otherJobItems, ...updatedItemsForJob].sort((a,b) => a.id - b.id);
             
             return { performance: newPerformance };
@@ -322,7 +302,7 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const value = {
-    metrics: { ...metrics, totalPacked },
+    metrics: { ...metrics, actual: totalPacked },
     dailySummary,
     hourlyBacklog,
     productivityData: productivityData,
@@ -336,7 +316,6 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
     setEditingPerformance,
     handleMetricsUpdate,
     handleHourlyBacklogUpdate,
-    handlePerformanceUpdate,
     handleProductivityUpdate,
     handleFileUpload,
     handleProductivityReset,

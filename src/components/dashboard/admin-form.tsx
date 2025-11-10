@@ -31,19 +31,10 @@ const hourlyBacklogSchema = z.object({
 
 type HourlyBacklogFormValues = z.infer<typeof hourlyBacklogSchema>;
 
-const performanceSchema = z.object({
-  picker: z.coerce.number().min(0),
-  packer: z.coerce.number().min(0),
-});
-
-type PerformanceFormValues = z.infer<typeof performanceSchema>;
-
 type AdminFormProps = {
   onMetricsSubmit: (data: MetricsFormValues) => void;
   onHourlyBacklogSubmit: (data: HourlyBacklogFormValues) => void;
-  onPerformanceSubmit: (data: PerformanceFormValues) => void;
   hourlyData: { hour: string; value: number }[];
-  performanceData: { picker: number; packer: number; };
   metrics: { forecast: number };
 };
 
@@ -119,52 +110,7 @@ const HourlyBacklogForm = ({ onHourlyBacklogSubmit, hourlyData }: { onHourlyBack
   );
 };
 
-const PerformanceForm = ({ onPerformanceSubmit, performanceData }: { onPerformanceSubmit: (data: PerformanceFormValues) => void, performanceData: PerformanceFormValues }) => {
-  const form = useForm<PerformanceFormValues>({
-    resolver: zodResolver(performanceSchema),
-    defaultValues: {
-      picker: performanceData?.picker || 0,
-      packer: performanceData?.packer || 0,
-    },
-  });
-
-  return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onPerformanceSubmit)} className="space-y-4 pt-4">
-        <FormField
-          control={form.control}
-          name="picker"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Picker</FormLabel>
-              <FormControl>
-                <Input type="number" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="packer"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Packer</FormLabel>
-              <FormControl>
-                <Input type="number" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <Button type="submit">Update Performance</Button>
-      </form>
-    </Form>
-  );
-};
-
-
-export default function AdminForm({ onMetricsSubmit, onHourlyBacklogSubmit, onPerformanceSubmit, hourlyData, performanceData, metrics }: AdminFormProps) {
+export default function AdminForm({ onMetricsSubmit, onHourlyBacklogSubmit, hourlyData, metrics }: AdminFormProps) {
   return (
     <Tabs defaultValue="metrics" className="w-full">
       <TabsList className="grid w-full grid-cols-2">
