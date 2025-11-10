@@ -56,6 +56,8 @@ type AdminContextType = {
   handleProductivityReset: () => void;
   handleProductivityDelete: (id: number) => void;
   handleProductivityDeleteAll: () => void;
+  handleOrderStatusUpload: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  handleOrderStatusTemplateExport: () => void;
   currentPage: number;
   setCurrentPage: (page: number) => void;
   rowsPerPage: number;
@@ -161,23 +163,25 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
           day2: { day: 2, actual: 0, total: 0 },
         };
         
-        const packedItems = hourlyBacklog.reduce((acc, curr) => acc + curr.value, 0);
-        const newOrderStatusData = {
-          ...initialOrderStatusData,
-          types: initialOrderStatusData.types.map(type => ({
-            ...type,
-            statuses: {
-              ...type.statuses,
-              packed: {
-                ...type.statuses.packed,
-                order: packedItems,
-                item: packedItems, 
+        // This is now automatically handled for packed items, but can be overridden by CSV upload
+        const existingPackedOrder = orderStatusData.types[0].statuses.packed.order;
+        if (totalPacked !== existingPackedOrder) {
+          const newOrderStatusData = {
+            ...orderStatusData,
+            types: orderStatusData.types.map(type => ({
+              ...type,
+              statuses: {
+                ...type.statuses,
+                packed: {
+                  ...type.statuses.packed,
+                  order: totalPacked,
+                  item: totalPacked, 
+                }
               }
-            }
-          }))
-        };
-        setOrderStatusData(newOrderStatusData);
-
+            }))
+          };
+          setOrderStatusData(newOrderStatusData);
+        }
 
         if (JSON.stringify(newMetrics) !== JSON.stringify(getFromLocalStorage('metrics', initialMetrics))) {
             setMetrics(newMetrics);
@@ -193,13 +197,13 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
         window.localStorage.setItem('productivityDate', JSON.stringify(productivityDate));
         window.localStorage.setItem('rowsPerPage', JSON.stringify(rowsPerPage));
         window.localStorage.setItem('productivityHoursData', JSON.stringify(productivityHoursData));
-        window.localStorage.setItem('orderStatusData', JSON.stringify(newOrderStatusData));
+        window.localStorage.setItem('orderStatusData', JSON.stringify(orderStatusData));
 
       } catch (error) {
         console.warn('Error writing to localStorage:', error);
       }
     }
-  }, [isClient, totalPacked, metrics, dailySummary, hourlyBacklog, productivityData, productivityDate, rowsPerPage, productivityHoursData]);
+  }, [isClient, totalPacked, metrics, dailySummary, hourlyBacklog, productivityData, productivityDate, rowsPerPage, productivityHoursData, orderStatusData]);
 
   const handleMetricsUpdate = (data: { forecast: number }) => {
     setMetrics((prevMetrics) => {
@@ -305,11 +309,84 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
     });
   };
   
-
   const handleProductivityDeleteAll = () => {
     setProductivityData({ performance: [] });
     setCurrentPage(1);
   };
+  
+  const handleOrderStatusUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      Papa.parse(file, {
+        header: true,
+        skipEmptyLines: true,
+        complete: (results) => {
+          const uploadedData = results.data as any[];
+          if (uploadedData.length === 0) return;
+
+          setOrderStatusData(prevData => {
+            const newData = JSON.parse(JSON.stringify(prevData)); // Deep copy
+            
+            uploadedData.forEach(row => {
+              const { type, status, order, item, avg, hPlus1, hPlus2, hPlus3 } = row;
+              const typeIndex = newData.types.findIndex((t: any) => t.name === type);
+              
+              if (typeIndex !== -1 && status in newData.types[typeIndex].statuses) {
+                const statusKey = status as keyof typeof newData.types[typeIndex].statuses;
+                newData.types[typeIndex].statuses[statusKey] = {
+                  order: parseInt(order) || 0,
+                  item: parseInt(item) || 0,
+                  avg: parseFloat(avg) || 0,
+                  hPlus1: parseInt(hPlus1) || 0,
+                  hPlus2: parseInt(hPlus2) || 0,
+                  hPlus3: parseInt(hPlus3) || 0,
+                };
+              }
+            });
+            
+            return newData;
+          });
+        },
+        error: (error: any) => {
+          console.error("Error parsing CSV:", error);
+        }
+      });
+    }
+    if (event.target) {
+        event.target.value = '';
+    }
+  };
+
+  const handleOrderStatusTemplateExport = () => {
+    const data = initialOrderStatusData;
+    const rows: any[] = [];
+    
+    data.types.forEach(type => {
+      Object.entries(type.statuses).forEach(([statusKey, statusValue]) => {
+        rows.push({
+          type: type.name,
+          status: statusKey,
+          order: 0,
+          item: 0,
+          avg: 0,
+          hPlus1: 0,
+          hPlus2: 0,
+          hPlus3: 0,
+        });
+      });
+    });
+
+    const csv = Papa.unparse(rows);
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute("download", "order_status_template.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
 
   const value = {
     metrics: { ...metrics, actual: totalPacked },
@@ -332,6 +409,8 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
     handleProductivityReset,
     handleProductivityDelete,
     handleProductivityDeleteAll,
+    handleOrderStatusUpload,
+    handleOrderStatusTemplateExport,
     currentPage,
     setCurrentPage,
     rowsPerPage,

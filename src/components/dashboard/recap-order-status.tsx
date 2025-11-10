@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import {
   Card,
   CardContent,
@@ -16,7 +16,8 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { ChevronUp, ChevronDown } from 'lucide-react';
+import { ChevronUp, ChevronDown, Upload, Download } from 'lucide-react';
+import { useAdmin } from '@/hooks/use-admin';
 
 type Status = {
   order: number;
@@ -68,6 +69,9 @@ const statusLabels: Record<string, string> = {
 
 export default function RecapOrderStatus({ data }: RecapOrderStatusProps) {
   const [isOpen, setIsOpen] = useState(true);
+  const { handleOrderStatusUpload, handleOrderStatusTemplateExport } = useAdmin();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
 
   if (!data || !data.types) {
     return null;
@@ -75,9 +79,28 @@ export default function RecapOrderStatus({ data }: RecapOrderStatusProps) {
 
   return (
     <Card>
-      <CardHeader className="flex flex-row items-center justify-between cursor-pointer" onClick={() => setIsOpen(!isOpen)}>
-        <CardTitle>Recap Order Status</CardTitle>
-        <Button variant="outline" size="icon">
+      <CardHeader className="flex flex-row items-start justify-between">
+        <div>
+          <CardTitle>Recap Order Status</CardTitle>
+          <div className="flex flex-wrap gap-2 mt-4">
+            <Button size="sm" onClick={() => fileInputRef.current?.click()}>
+              <Upload className="mr-2" />
+              Upload CSV
+            </Button>
+            <input
+              type="file"
+              ref={fileInputRef}
+              className="hidden"
+              accept=".csv"
+              onChange={handleOrderStatusUpload}
+            />
+            <Button size="sm" onClick={handleOrderStatusTemplateExport}>
+              <Download className="mr-2" />
+              Download Template
+            </Button>
+          </div>
+        </div>
+        <Button variant="outline" size="icon" onClick={() => setIsOpen(!isOpen)}>
           {isOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
         </Button>
       </CardHeader>
