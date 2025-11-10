@@ -69,18 +69,18 @@ const ProductivityRow = ({ role, data }: { role: string; data: RoleData }) => (
     <TableCell className="text-destructive font-bold">{data.targetEndShiftOrder.toLocaleString()}</TableCell>
     <TableCell className="text-destructive font-bold">{data.targetEndShiftQuantity.toLocaleString()}</TableCell>
     <TableCell>
-        <div className="flex items-center gap-2">
-            <Progress value={data.progress} className="w-24 h-3" />
-            <span className="text-xs font-medium">{data.progress.toFixed(0)}%</span>
-        </div>
-    </TableCell>
-    <TableCell>
       <Badge className={cn("text-center font-bold", data.status === "GAGAL" ? "bg-yellow-400 text-black hover:bg-yellow-500" : "bg-green-500 hover:bg-green-600")}>
         <div className="flex items-center justify-center gap-1">
           <span>{data.status}</span>
           {data.status === "GAGAL" ? <ThumbsDown className="h-4 w-4" /> : <ThumbsUp className="h-4 w-4" />}
         </div>
       </Badge>
+    </TableCell>
+    <TableCell>
+        <div className="flex items-center gap-2">
+            <Progress value={data.progress} className="w-24 h-3" />
+            <span className="text-xs font-medium">{data.progress.toFixed(0)}%</span>
+        </div>
     </TableCell>
   </TableRow>
 );
@@ -108,12 +108,12 @@ export default function ProductivityHours({ data }: ProductivityHoursProps) {
                   <TableHead>Total Quantity</TableHead>
                   <TableHead>Avg Order Hours</TableHead>
                   <TableHead>Avg Quantity Hours</TableHead>
-                  <TableHead>Benchmark Order / Hour</TableHead>
-                  <TableHead>Benchmark Quantity / Hour</TableHead>
-                  <TableHead>Benchmark End Shift Order</TableHead>
-                  <TableHead>Benchmark End Shift Quantity</TableHead>
-                  <TableHead>Progress</TableHead>
+                  <TableHead>Hourly Standard Order</TableHead>
+                  <TableHead>Hourly Standard Quantity</TableHead>
+                  <TableHead>End Shift Standard Order</TableHead>
+                  <TableHead>End Shift Standard Quantity</TableHead>
                   <TableHead>Status</TableHead>
+                  <TableHead>Progress</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
