@@ -9,11 +9,11 @@ export const initialOrderStatusData = {
     {
       name: "Marketplace",
       statuses: {
-        paymentAccepted: { order: 0, item: 0, avg: 0 },
-        inProgress: { order: 0, item: 0, avg: 0 },
-        picked: { order: 0, item: 0, avg: 0 },
-        packed: { order: 0, item: 0, avg: 0 },
-        shipped: { order: 0, item: 0, avg: 0 },
+        paymentAccepted: { order: 0, item: 0, avg: 0, hPlus1: 0, hPlus2: 0, hPlus3: 0 },
+        inProgress: { order: 0, item: 0, avg: 0, hPlus1: 0, hPlus2: 0, hPlus3: 0 },
+        picked: { order: 0, item: 0, avg: 0, hPlus1: 0, hPlus2: 0, hPlus3: 0 },
+        packed: { order: 0, item: 0, avg: 0, hPlus1: 0, hPlus2: 0, hPlus3: 0 },
+        shipped: { order: 0, item: 0, avg: 0, hPlus1: 0, hPlus2: 0, hPlus3: 0 },
       },
     },
   ],

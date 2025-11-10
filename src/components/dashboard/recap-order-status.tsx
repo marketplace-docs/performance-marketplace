@@ -22,6 +22,9 @@ type Status = {
   order: number;
   item: number;
   avg: number;
+  hPlus1: number;
+  hPlus2: number;
+  hPlus3: number;
 };
 
 type OrderStatusData = {
@@ -86,6 +89,9 @@ export default function RecapOrderStatus({ data }: RecapOrderStatusProps) {
                   <TableHead>Order</TableHead>
                   <TableHead>Item</TableHead>
                   <TableHead>AVG</TableHead>
+                  <TableHead>H+&gt;1</TableHead>
+                  <TableHead>H+&gt;2</TableHead>
+                  <TableHead>H+&gt;3</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -101,6 +107,9 @@ export default function RecapOrderStatus({ data }: RecapOrderStatusProps) {
                       <TableCell>{formatNumber(statusValue.order)}</TableCell>
                       <TableCell>{formatNumber(statusValue.item)}</TableCell>
                       <TableCell>{formatNumber(statusValue.avg)}</TableCell>
+                      <TableCell>{formatNumber(statusValue.hPlus1)}</TableCell>
+                      <TableCell>{formatNumber(statusValue.hPlus2)}</TableCell>
+                      <TableCell>{formatNumber(statusValue.hPlus3)}</TableCell>
                     </TableRow>
                   ))
                 ))}
